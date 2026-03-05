@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Daily To-Do List</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .task-item { transition: all 0.2s ease; }
+        .task-item:hover { transform: translateX(4px); }
+        .task-text.completed { text-decoration: line-through; opacity: 0.6; }
+        .checkbox-custom { transition: all 0.2s ease; }
+        .checkbox-custom:checked { background-color: #3b82f6; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in { animation: slideIn 0.3s ease forwards; }
+        .btn-loading { opacity: 0.7; pointer-events: none; }
+    </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full bg-gradient-to-br from-blue-50 via-white to-slate-100 overflow-auto">
+  <div class="w-full min-h-full p-4 sm:p-6 lg:p-8">
+   <div class="max-w-2xl mx-auto"><!-- Header -->
+    <header class="text-center mb-8">
+     <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-500 rounded-2xl mb-4 shadow-lg shadow-blue-200">
+      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+      </svg>
+     </div>
+     <h1 id="page-title" class="text-3xl sm:text-4xl font-bold text-slate-800 mb-2">My Daily To-Do List</h1>
+     <p id="page-description" class="text-slate-500 text-lg">Add, manage, and complete your daily tasks.</p>
+    </header><!-- Task Counter -->
+    <div class="flex justify-center gap-4 mb-6">
+     <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100"><span class="text-slate-500 text-sm">Total Tasks</span> <span id="total-count" class="ml-2 font-bold text-slate-800">0</span>
+     </div>
+     <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100"><span class="text-slate-500 text-sm">Completed</span> <span id="completed-count" class="ml-2 font-bold text-green-600">0</span>
+     </div>
+    </div><!-- Add Task Form -->
+    <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-4 sm:p-6 mb-6 border border-slate-100">
+     <form id="task-form" class="flex flex-col sm:flex-row gap-3"><input type="text" id="task-input" placeholder="What needs to be done today?" class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-700 placeholder-slate-400" aria-label="New task"> <button type="submit" id="add-btn" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-all shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-300 flex items-center justify-center gap-2">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+       </svg><span>Add Task</span> </button>
+     </form>
+     <p id="limit-warning" class="hidden mt-3 text-amber-600 text-sm bg-amber-50 px-3 py-2 rounded-lg">⚠️ Maximum limit of 999 tasks reached. Please delete some tasks first.</p>
+    </div><!-- Task List -->
+    <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden">
+     <div class="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center">
+      <h2 class="font-semibold text-slate-700 flex items-center gap-2">
+       <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+       </svg> Your Tasks</h2><button id="clear-all-btn" class="hidden px-4 py-2 text-sm text-red-500 hover:text-white hover:bg-red-500 border border-red-200 hover:border-red-500 rounded-lg transition-all font-medium"> Clear All </button>
+     </div>
+     <div id="task-list" class="divide-y divide-slate-100"><!-- Tasks will be inserted here -->
+     </div>
+     <div id="empty-state" class="p-8 text-center">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4">
+       <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+       </svg>
+      </div>
+      <p class="text-slate-500 font-medium">No tasks yet</p>
+      <p class="text-slate-400 text-sm mt-1">Add your first task above to get started!</p>
+     </div>
+    </div><!-- Footer -->
+    <footer class="text-center mt-8 text-slate-400 text-sm">
+     <p>✨ Stay productive, one task at a time</p>
+    </footer>
+   </div>
+  </div>
+  <script>
+        // Default configuration
+        const defaultConfig = {
+            page_title: "My Daily To-Do List",
+            page_description: "Add, manage, and complete your daily tasks.",
+            input_placeholder: "What needs to be done today?",
+            background_color: "#eff6ff",
+            surface_color: "#ffffff",
+            text_color: "#1e293b",
+            primary_action_color: "#3b82f6",
+            secondary_action_color: "#ef4444",
+            font_family: "Plus Jakarta Sans",
+            font_size: 16
+        };
+
+        // State
+        let tasks = [];
+        let confirmingDeleteId = null;
+        let confirmingClearAll = false;
+
+        // DOM Elements
+        const taskForm = document.getElementById('task-form');
+        const taskInput = document.getElementById('task-input');
+        const taskList = document.getElementById('task-list');
+        const emptyState = document.getElementById('empty-state');
+        const totalCount = document.getElementById('total-count');
+        const completedCount = document.getElementById('completed-count');
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        const addBtn = document.getElementById('add-btn');
+        const limitWarning = document.getElementById('limit-warning');
+
+        // Initialize Element SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange: async (config) => {
+                    document.getElementById('page-title').textContent = config.page_title || defaultConfig.page_title;
+                    document.getElementById('page-description').textContent = config.page_description || defaultConfig.page_description;
+                    taskInput.placeholder = config.input_placeholder || defaultConfig.input_placeholder;
+                    
+                    const fontFamily = config.font_family || defaultConfig.font_family;
+                    const fontSize = config.font_size || defaultConfig.font_size;
+                    document.body.style.fontFamily = `'${fontFamily}', sans-serif`;
+                    document.getElementById('page-title').style.fontSize = `${fontSize * 2}px`;
+                    document.getElementById('page-description').style.fontSize = `${fontSize}px`;
+                },
+                mapToCapabilities: (config) => ({
+                    recolorables: [
+                        {
+                            get: () => config.background_color || defaultConfig.background_color,
+                            set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+                        },
+                        {
+                            get: () => config.surface_color || defaultConfig.surface_color,
+                            set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+                        },
+                        {
+                            get: () => config.text_color || defaultConfig.text_color,
+                            set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+                        },
+                        {
+                            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                            set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }
+                        },
+                        {
+                            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+                            set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }
+                        }
+                    ],
+                    borderables: [],
+                    fontEditable: {
+                        get: () => config.font_family || defaultConfig.font_family,
+                        set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+                    },
+                    fontSizeable: {
+                        get: () => config.font_size || defaultConfig.font_size,
+                        set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+                    }
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ["page_title", config.page_title || defaultConfig.page_title],
+                    ["page_description", config.page_description || defaultConfig.page_description],
+                    ["input_placeholder", config.input_placeholder || defaultConfig.input_placeholder]
+                ])
+            });
+        }
+
+        // Data Handler
+        const dataHandler = {
+            onDataChanged(data) {
+                tasks = data;
+                renderTasks();
+                updateCounters();
+            }
+        };
+
+        // Initialize Data SDK
+        async function initDataSdk() {
+            if (window.dataSdk) {
+                const result = await window.dataSdk.init(dataHandler);
+                if (!result.isOk) {
+                    console.error("Failed to initialize Data SDK");
+                }
+            }
+        }
+
+        // Render tasks efficiently
+        function renderTasks() {
+            const existingItems = new Map(
+                [...taskList.querySelectorAll('.task-item')].map(el => [el.dataset.taskId, el])
+            );
+
+            // Sort tasks by creation date (newest first)
+            const sortedTasks = [...tasks].sort((a, b) => 
+                new Date(b.createdAt) - new Date(a.createdAt)
+            );
+
+            sortedTasks.forEach((task, index) => {
+                if (existingItems.has(task.__backendId)) {
+                    updateTaskElement(existingItems.get(task.__backendId), task);
+                    existingItems.delete(task.__backendId);
+                } else {
+                    const element = createTaskElement(task);
+                    if (index === 0) {
+                        taskList.prepend(element);
+                    } else {
+                        const prevTask = sortedTasks[index - 1];
+                        const prevElement = taskList.querySelector(`[data-task-id="${prevTask.__backendId}"]`);
+                        if (prevElement) {
+                            prevElement.after(element);
+                        } else {
+                            taskList.appendChild(element);
+                        }
+                    }
+                }
+            });
+
+            // Remove deleted items
+            existingItems.forEach(el => el.remove());
+
+            // Toggle empty state and clear button
+            emptyState.classList.toggle('hidden', tasks.length > 0);
+            clearAllBtn.classList.toggle('hidden', tasks.length === 0);
+            
+            // Reset clear all confirmation if tasks changed
+            if (confirmingClearAll) {
+                confirmingClearAll = false;
+                clearAllBtn.textContent = 'Clear All';
+                clearAllBtn.classList.remove('bg-red-500', 'text-white');
+            }
+        }
+
+        // Create task element
+        function createTaskElement(task) {
+            const div = document.createElement('div');
+            div.className = 'task-item p-4 sm:px-6 flex items-center gap-3 hover:bg-slate-50 transition-colors slide-in';
+            div.dataset.taskId = task.__backendId;
+            
+            div.innerHTML = `
+                <label class="relative flex items-center cursor-pointer">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} class="checkbox-custom w-5 h-5 rounded-md border-2 border-slate-300 appearance-none cursor-pointer checked:border-blue-500">
+                    <svg class="absolute w-3 h-3 left-1 top-1 text-white pointer-events-none ${task.completed ? '' : 'hidden'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </label>
+                <span class="task-text flex-1 text-slate-700 ${task.completed ? 'completed' : ''}">${escapeHtml(task.text)}</span>
+                <button class="delete-btn p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete task">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            `;
+
+            // Add event listeners
+            const checkbox = div.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', () => toggleTask(task));
+
+            const deleteBtn = div.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => handleDeleteClick(task, div));
+
+            return div;
+        }
+
+        // Update existing task element
+        function updateTaskElement(element, task) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            const checkIcon = element.querySelector('svg.absolute');
+            const textSpan = element.querySelector('.task-text');
+            
+            checkbox.checked = task.completed;
+            checkIcon.classList.toggle('hidden', !task.completed);
+            textSpan.textContent = task.text;
+            textSpan.classList.toggle('completed', task.completed);
+        }
+
+        // Update counters
+        function updateCounters() {
+            totalCount.textContent = tasks.length;
+            completedCount.textContent = tasks.filter(t => t.completed).length;
+            
+            // Show/hide limit warning
+            limitWarning.classList.toggle('hidden', tasks.length < 999);
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Add new task
+        async function addTask(text) {
+            if (tasks.length >= 999) {
+                limitWarning.classList.remove('hidden');
+                return;
+            }
+
+            addBtn.classList.add('btn-loading');
+            addBtn.innerHTML = `
+                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Adding...</span>
+            `;
+
+            const result = await window.dataSdk.create({
+                id: Date.now().toString(),
+                text: text,
+                completed: false,
+                createdAt: new Date().toISOString()
+            });
+
+            addBtn.classList.remove('btn-loading');
+            addBtn.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>Add Task</span>
+            `;
+
+            if (!result.isOk) {
+                showError('Failed to add task. Please try again.');
+            }
+        }
+
+        // Toggle task completion
+        async function toggleTask(task) {
+            const result = await window.dataSdk.update({
+                ...task,
+                completed: !task.completed
+            });
+
+            if (!result.isOk) {
+                showError('Failed to update task. Please try again.');
+            }
+        }
+
+        // Handle delete click with inline confirmation
+        function handleDeleteClick(task, element) {
+            if (confirmingDeleteId === task.__backendId) {
+                deleteTask(task, element);
+            } else {
+                // Reset previous confirmation
+                if (confirmingDeleteId) {
+                    const prevBtn = taskList.querySelector(`[data-task-id="${confirmingDeleteId}"] .delete-btn`);
+                    if (prevBtn) resetDeleteButton(prevBtn);
+                }
+                
+                confirmingDeleteId = task.__backendId;
+                const deleteBtn = element.querySelector('.delete-btn');
+                deleteBtn.innerHTML = `<span class="text-xs font-medium px-1">Confirm?</span>`;
+                deleteBtn.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
+                
+                // Auto-reset after 3 seconds
+                setTimeout(() => {
+                    if (confirmingDeleteId === task.__backendId) {
+                        confirmingDeleteId = null;
+                        resetDeleteButton(deleteBtn);
+                    }
+                }, 3000);
+            }
+        }
+
+        // Reset delete button
+        function resetDeleteButton(btn) {
+            btn.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            `;
+            btn.classList.remove('bg-red-500', 'text-white', 'hover:bg-red-600');
+        }
+
+        // Delete task
+        async function deleteTask(task, element) {
+            element.style.opacity = '0.5';
+            element.style.pointerEvents = 'none';
+
+            const result = await window.dataSdk.delete(task);
+            
+            confirmingDeleteId = null;
+
+            if (!result.isOk) {
+                element.style.opacity = '1';
+                element.style.pointerEvents = 'auto';
+                showError('Failed to delete task. Please try again.');
+            }
+        }
+
+        // Clear all tasks
+        async function clearAllTasks() {
+            if (!confirmingClearAll) {
+                confirmingClearAll = true;
+                clearAllBtn.textContent = 'Click to Confirm';
+                clearAllBtn.classList.add('bg-red-500', 'text-white');
+                
+                setTimeout(() => {
+                    if (confirmingClearAll) {
+                        confirmingClearAll = false;
+                        clearAllBtn.textContent = 'Clear All';
+                        clearAllBtn.classList.remove('bg-red-500', 'text-white');
+                    }
+                }, 3000);
+                return;
+            }
+
+            clearAllBtn.textContent = 'Clearing...';
+            clearAllBtn.disabled = true;
+
+            for (const task of tasks) {
+                await window.dataSdk.delete(task);
+            }
+
+            clearAllBtn.textContent = 'Clear All';
+            clearAllBtn.disabled = false;
+            confirmingClearAll = false;
+            clearAllBtn.classList.remove('bg-red-500', 'text-white');
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg z-50 slide-in';
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                errorDiv.style.opacity = '0';
+                setTimeout(() => errorDiv.remove(), 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        taskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = taskInput.value.trim();
+            if (text) {
+                await addTask(text);
+                taskInput.value = '';
+            }
+        });
+
+        clearAllBtn.addEventListener('click', clearAllTasks);
+
+        // Initialize
+        initDataSdk();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d7a0b5b9060693a',t:'MTc3MjcyMzM5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
