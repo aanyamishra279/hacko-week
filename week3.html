@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Tech Fest 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&amp;family=Quicksand:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      font-family: 'Quicksand', sans-serif;
+    }
+    
+    .font-marker {
+      font-family: 'Permanent Marker', cursive;
+    }
+    
+    @keyframes sway {
+      0%, 100% { transform: rotate(-2deg) translateY(0px); }
+      50% { transform: rotate(2deg) translateY(-8px); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    @keyframes vine-grow {
+      0% { stroke-dashoffset: 100; }
+      100% { stroke-dashoffset: 0; }
+    }
+    
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    
+    @keyframes leaf-wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(5deg); }
+      75% { transform: rotate(-5deg); }
+    }
+    
+    .glow-border {
+      animation: shimmer 3s ease-in-out infinite;
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.2), 0 0 60px rgba(34, 197, 94, 0.1);
+    }
+    
+    .float-animation {
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    .sway-animation {
+      animation: sway 3s ease-in-out infinite;
+    }
+    
+    .vine-line {
+      stroke-dasharray: 100;
+      animation: vine-grow 4s linear infinite;
+    }
+    
+    .leaf-wiggle {
+      animation: leaf-wiggle 2s ease-in-out infinite;
+    }
+    
+    .jungle-shadow {
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4), 0 0 20px rgba(34, 197, 94, 0.3);
+    }
+    
+    .input-glow:focus {
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3), 0 0 20px rgba(34, 197, 94, 0.2);
+    }
+    
+    .btn-glow:hover {
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.6), 0 0 60px rgba(34, 197, 94, 0.3);
+    }
+    
+    .jungle-bg {
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(34, 197, 94, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(132, 204, 22, 0.08) 0%, transparent 50%),
+        linear-gradient(180deg, #0a3818 0%, #052e16 100%);
+    }
+    
+    .card-gradient {
+      background: linear-gradient(135deg, rgba(20, 83, 45, 0.85) 0%, rgba(21, 128, 61, 0.7) 100%);
+      backdrop-filter: blur(10px);
+    }
+    
+    .toast {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .loading-spinner {
+      border: 2px solid rgba(34, 197, 94, 0.2);
+      border-top-color: #22c55e;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full bg-green-950 text-white overflow-auto">
+  <div id="app-wrapper" class="min-h-full w-full jungle-bg relative"><!-- Decorative Jungle Vines SVG Background -->
+   <svg class="absolute top-0 left-0 w-full h-full pointer-events-none opacity-15" preserveaspectratio="none"><defs>
+     <lineargradient id="vine-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22c55e;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#84cc16;stop-opacity:0.6" />
+     </lineargradient>
+    </defs> <path class="vine-line" d="M0,50 Q30,20 60,50 T120,50" stroke="url(#vine-gradient)" stroke-width="3" fill="none" /> <path class="vine-line" style="animation-delay: 1s" d="M100,0 Q130,30 160,0 T220,0" stroke="url(#vine-gradient)" stroke-width="2" fill="none" /> <circle cx="60" cy="50" r="8" fill="#22c55e" opacity="0.4">
+     <animate attributename="r" values="8;10;8" dur="3s" repeatcount="indefinite" />
+    </circle> <circle cx="160" cy="0" r="6" fill="#84cc16" opacity="0.4">
+     <animate attributename="r" values="6;9;6" dur="2.5s" repeatcount="indefinite" />
+    </circle>
+   </svg><!-- Floating Leaves and Fireflies -->
+   <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-20 left-10 text-4xl opacity-60 sway-animation">
+     🍃
+    </div>
+    <div class="absolute top-40 right-20 text-2xl opacity-50 sway-animation" style="animation-delay: 1s">
+     🌿
+    </div>
+    <div class="absolute bottom-40 left-1/4 text-3xl opacity-40 float-animation" style="animation-delay: 2s">
+     🍂
+    </div>
+    <div class="absolute top-1/3 right-1/3 text-xl opacity-70 float-animation leaf-wiggle" style="animation-delay: 1.5s">
+     ✨
+    </div>
+    <div class="absolute top-60 right-10 text-sm opacity-80 float-animation" style="animation-delay: 0.5s">
+     🦋
+    </div>
+    <div class="absolute bottom-20 left-20 text-2xl opacity-50 sway-animation" style="animation-delay: 2.5s">
+     🌺
+    </div>
+   </div>
+   <div class="relative z-10 max-w-4xl mx-auto px-4 py-8 md:py-12"><!-- Header Section -->
+    <header class="text-center mb-10 md:mb-14"><!-- Jungle Icon -->
+     <div class="inline-block mb-6 float-animation">
+      <div class="text-7xl md:text-8xl filter drop-shadow-lg">
+       🌴
+      </div>
+     </div>
+     <h1 id="event-title" class="font-marker text-3xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-green-400 via-lime-300 to-emerald-400 bg-clip-text text-transparent jungle-shadow">College Tech Fest 2026</h1>
+     <p id="event-subtitle" class="text-lg md:text-xl text-green-100 font-light tracking-wide">Register Now for Exciting Technical Events</p><!-- Decorative Line -->
+     <div class="flex items-center justify-center gap-2 mt-6">
+      <div class="h-px w-16 bg-gradient-to-r from-transparent to-green-400"></div>
+      <div class="text-green-400 text-xl">
+       🌿
+      </div>
+      <div class="h-px w-16 bg-gradient-to-l from-transparent to-green-400"></div>
+     </div>
+    </header><!-- Registration Form Card -->
+    <div class="card-gradient rounded-2xl p-6 md:p-10 border border-green-700/50 glow-border"><!-- Form Header -->
+     <div class="flex items-center gap-3 mb-8">
+      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-lime-500 flex items-center justify-center text-2xl">
+       📝
+      </div>
+      <div>
+       <h2 class="font-marker text-xl md:text-2xl font-semibold text-white">Registration Form</h2>
+       <p class="text-sm text-green-200">Fill in your details to participate</p>
+      </div>
+     </div>
+     <form id="registration-form" class="space-y-6"><!-- Row 1: Name & Email -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div class="space-y-2"><label for="fullName" class="block text-sm font-medium text-green-300 uppercase tracking-wider"> <span class="flex items-center gap-2"> 👤 Full Name </span> </label> <input type="text" id="fullName" name="fullName" required class="w-full px-4 py-3 bg-green-950/70 border border-green-600 rounded-lg text-white placeholder-green-400/50 focus:border-green-400 focus:outline-none input-glow transition-all duration-300" placeholder="Enter your full name">
+       </div>
+       <div class="space-y-2"><label for="email" class="block text-sm font-medium text-green-300 uppercase tracking-wider"> <span class="flex items-center gap-2"> 📧 Email Address </span> </label> <input type="email" id="email" name="email" required class="w-full px-4 py-3 bg-green-950/70 border border-green-600 rounded-lg text-white placeholder-green-400/50 focus:border-green-400 focus:outline-none input-glow transition-all duration-300" placeholder="your.email@college.edu">
+       </div>
+      </div><!-- Row 2: Phone & College -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div class="space-y-2"><label for="phone" class="block text-sm font-medium text-green-300 uppercase tracking-wider"> <span class="flex items-center gap-2"> 📱 Phone Number </span> </label> <input type="tel" id="phone" name="phone" required class="w-full px-4 py-3 bg-green-950/70 border border-green-600 rounded-lg text-white placeholder-green-400/50 focus:border-green-400 focus:outline-none input-glow transition-all duration-300" placeholder="+91 98765 43210">
+       </div>
+       <div class="space-y-2"><label for="college" class="block text-sm font-medium text-green-300 uppercase tracking-wider"> <span class="flex items-center gap-2"> 🏫 College Name </span> </label> <input type="text" id="college" name="college" required class="w-full px-4 py-3 bg-green-950/70 border border-green-600 rounded-lg text-white placeholder-green-400/50 focus:border-green-400 focus:outline-none input-glow transition-all duration-300" placeholder="Enter your college name">
+       </div>
+      </div><!-- Row 3: Department & Year -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div class="space-y-2"><label for="department" class="block text-sm font-medium text-green-300 uppercase tracking-wider"> <span class="flex items-center gap-2"> 💻 Department </span> </label> <select id="department" name="department" required class="w-full px-4 py-3 bg-green-950/70 border border-green-600 rounded-lg text-white focus:border-green-400 focus:outline-none input-glow transition-all duration-300 cursor-pointer"> <option value="" class="bg-green-950">Select Department</option> <option value="CSE" class="bg-green-950">Computer Science &amp; Engineering</option> <option value="IT" class="bg-green-950">Information Technology</option> <option value="ECE" class="bg-green-950">Electronics &amp; Communication</option> <option value="EEE" class="bg-green-950">Electrical &amp; Electronics</option> <option value="MECH" class="bg-green-950">Mechanical Engineering</option> <option value="CIVIL" class="bg-green-950">Civil Engineering</option> <option value="AI" class="bg-green-950">Artificial Intelligence &amp; ML</option> <option value="DATA" class="bg-green-950">Data Science</option> <option value="OTHER" class="bg-green-950">Other</option> </select>
+       </div>
+       <div class="space-y-2"><label for="year" class="block text-sm font-medium text-green-300 uppercase tracking-wider"> <span class="flex items-center gap-2"> 📅 Year of Study </span> </label> <select id="year" name="year" required class="w-full px-4 py-3 bg-green-950/70 border border-green-600 rounded-lg text-white focus:border-green-400 focus:outline-none input-glow transition-all duration-300 cursor-pointer"> <option value="" class="bg-green-950">Select Year</option> <option value="1" class="bg-green-950">1st Year</option> <option value="2" class="bg-green-950">2nd Year</option> <option value="3" class="bg-green-950">3rd Year</option> <option value="4" class="bg-green-950">4th Year</option> <option value="PG" class="bg-green-950">Post Graduate</option> </select>
+       </div>
+      </div><!-- Row 4: Event Selection -->
+      <div class="space-y-2"><label for="event" class="block text-sm font-medium text-green-300 uppercase tracking-wider"> <span class="flex items-center gap-2"> ⚡ Event Selection </span> </label> <select id="event" name="event" required class="w-full px-4 py-3 bg-green-950/70 border border-green-600 rounded-lg text-white focus:border-green-400 focus:outline-none input-glow transition-all duration-300 cursor-pointer"> <option value="" class="bg-green-950">Choose an Event</option> <option value="hackathon" class="bg-green-950">🚀 24-Hour Hackathon</option> <option value="coding" class="bg-green-950">💻 Competitive Coding Challenge</option> <option value="robotics" class="bg-green-950">🤖 Robotics Competition</option> <option value="webdev" class="bg-green-950">🌐 Web Development Contest</option> <option value="ml" class="bg-green-950">🧠 Machine Learning Workshop</option> <option value="cybersec" class="bg-green-950">🔐 Cybersecurity CTF</option> <option value="gaming" class="bg-green-950">🎮 E-Sports Tournament</option> <option value="paper" class="bg-green-950">📝 Technical Paper Presentation</option> <option value="project" class="bg-green-950">💡 Project Exhibition</option> </select>
+      </div><!-- Submit Button -->
+      <div class="pt-4"><button type="submit" id="submit-btn" class="w-full py-4 px-6 bg-gradient-to-r from-green-500 to-lime-500 text-white font-marker font-semibold text-lg rounded-lg btn-glow transition-all duration-300 hover:from-green-400 hover:to-lime-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-green-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"> <span id="btn-text">Register Now</span> <span id="btn-arrow" class="text-xl transition-transform">🌿</span>
+        <div id="btn-spinner" class="loading-spinner hidden"></div></button>
+      </div>
+     </form><!-- Data Limit Warning -->
+     <div id="limit-warning" class="hidden mt-4 p-4 bg-amber-500/20 border border-amber-500/50 rounded-lg text-amber-300 text-center">
+      ⚠️ Registration limit reached. Please contact the organizers.
+     </div>
+    </div><!-- Stats Section -->
+    <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+     <div class="text-center p-4 rounded-xl bg-green-900/50 border border-green-700/50">
+      <div class="font-marker text-2xl md:text-3xl font-bold text-green-400" id="registrations-count">
+       0
+      </div>
+      <div class="text-xs md:text-sm text-green-200 uppercase tracking-wider mt-1">
+       Registered
+      </div>
+     </div>
+     <div class="text-center p-4 rounded-xl bg-green-900/50 border border-green-700/50">
+      <div class="font-marker text-2xl md:text-3xl font-bold text-lime-400">
+       9+
+      </div>
+      <div class="text-xs md:text-sm text-green-200 uppercase tracking-wider mt-1">
+       Events
+      </div>
+     </div>
+     <div class="text-center p-4 rounded-xl bg-green-900/50 border border-green-700/50">
+      <div class="font-marker text-2xl md:text-3xl font-bold text-emerald-400">
+       ₹50K+
+      </div>
+      <div class="text-xs md:text-sm text-green-200 uppercase tracking-wider mt-1">
+       Prizes
+      </div>
+     </div>
+     <div class="text-center p-4 rounded-xl bg-green-900/50 border border-green-700/50">
+      <div class="font-marker text-2xl md:text-3xl font-bold text-yellow-400">
+       3
+      </div>
+      <div class="text-xs md:text-sm text-green-200 uppercase tracking-wider mt-1">
+       Days
+      </div>
+     </div>
+    </div><!-- Footer -->
+    <footer class="mt-10 text-center text-green-500 text-sm">
+     <p>© 2026 College Tech Fest. All rights reserved.</p>
+     <div class="flex items-center justify-center gap-4 mt-3"><a href="#" class="hover:text-green-300 transition-colors">Terms</a> <span>🌿</span> <a href="#" class="hover:text-green-300 transition-colors">Privacy</a> <span>🌿</span> <a href="#" class="hover:text-green-300 transition-colors">Contact</a>
+     </div>
+    </footer>
+   </div><!-- Toast Container -->
+   <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+  </div>
+  <script>
+    // Default configuration
+    const defaultConfig = {
+      event_title: 'College Tech Fest 2026',
+      event_subtitle: 'Register Now for Exciting Technical Events',
+      register_button_text: 'Register Now',
+      background_color: '#052e16',
+      surface_color: '#14532d',
+      text_color: '#d1fae5',
+      primary_action_color: '#22c55e',
+      secondary_action_color: '#84cc16',
+      font_family: 'Quicksand',
+      font_size: 16
+    };
+
+    let config = { ...defaultConfig };
+    let registrations = [];
+    let isSubmitting = false;
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 ${
+        type === 'success' ? 'bg-emerald-500/90' : 'bg-red-500/90'
+      } text-white`;
+      
+      const icon = type === 'success' 
+        ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+        : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+      
+      toast.innerHTML = `${icon}<span>${message}</span>`;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'all 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Set loading state
+    function setLoading(loading) {
+      isSubmitting = loading;
+      const btn = document.getElementById('submit-btn');
+      const btnText = document.getElementById('btn-text');
+      const btnArrow = document.getElementById('btn-arrow');
+      const btnSpinner = document.getElementById('btn-spinner');
+      
+      btn.disabled = loading;
+      btnText.textContent = loading ? 'Registering...' : (config.register_button_text || defaultConfig.register_button_text);
+      btnArrow.classList.toggle('hidden', loading);
+      btnSpinner.classList.toggle('hidden', !loading);
+    }
+
+    // Data handler for SDK
+    const dataHandler = {
+      onDataChanged(data) {
+        registrations = data;
+        document.getElementById('registrations-count').textContent = data.length;
+        
+        // Show/hide limit warning
+        const limitWarning = document.getElementById('limit-warning');
+        if (data.length >= 999) {
+          limitWarning.classList.remove('hidden');
+        } else {
+          limitWarning.classList.add('hidden');
+        }
+      }
+    };
+
+    // Handle form submission
+    async function handleSubmit(e) {
+      e.preventDefault();
+      
+      if (isSubmitting) return;
+      
+      if (registrations.length >= 999) {
+        showToast('Registration limit reached. Please contact organizers.', 'error');
+        return;
+      }
+      
+      const form = e.target;
+      const formData = new FormData(form);
+      
+      const registration = {
+        full_name: formData.get('fullName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        college: formData.get('college'),
+        department: formData.get('department'),
+        year: formData.get('year'),
+        event: formData.get('event'),
+        registered_at: new Date().toISOString()
+      };
+      
+      setLoading(true);
+      
+      try {
+        const result = await window.dataSdk.create(registration);
+        
+        if (result.isOk) {
+          showToast('🎉 Registration successful! See you at the event!', 'success');
+          form.reset();
+        } else {
+          showToast('Registration failed. Please try again.', 'error');
+        }
+      } catch (error) {
+        showToast('Something went wrong. Please try again.', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Apply configuration to UI
+    async function onConfigChange(cfg) {
+      config = { ...defaultConfig, ...cfg };
+      
+      // Update text content
+      document.getElementById('event-title').textContent = config.event_title || defaultConfig.event_title;
+      document.getElementById('event-subtitle').textContent = config.event_subtitle || defaultConfig.event_subtitle;
+      
+      if (!isSubmitting) {
+        document.getElementById('btn-text').textContent = config.register_button_text || defaultConfig.register_button_text;
+      }
+      
+      // Apply colors
+      document.body.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      
+      // Apply font
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${fontFamily}, Quicksand, sans-serif`;
+      
+      // Apply font size scaling
+      const baseSize = config.font_size || defaultConfig.font_size;
+      document.getElementById('event-title').style.fontSize = `${baseSize * 3}px`;
+      document.getElementById('event-subtitle').style.fontSize = `${baseSize * 1.25}px`;
+    }
+
+    // Map config to capabilities
+    function mapToCapabilities(cfg) {
+      return {
+        recolorables: [
+          {
+            get: () => cfg.background_color || defaultConfig.background_color,
+            set: (value) => { cfg.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
+          },
+          {
+            get: () => cfg.surface_color || defaultConfig.surface_color,
+            set: (value) => { cfg.surface_color = value; window.elementSdk.setConfig({ surface_color: value }); }
+          },
+          {
+            get: () => cfg.text_color || defaultConfig.text_color,
+            set: (value) => { cfg.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+          },
+          {
+            get: () => cfg.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => { cfg.primary_action_color = value; window.elementSdk.setConfig({ primary_action_color: value }); }
+          },
+          {
+            get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => { cfg.secondary_action_color = value; window.elementSdk.setConfig({ secondary_action_color: value }); }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => cfg.font_family || defaultConfig.font_family,
+          set: (value) => { cfg.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
+        },
+        fontSizeable: {
+          get: () => cfg.font_size || defaultConfig.font_size,
+          set: (value) => { cfg.font_size = value; window.elementSdk.setConfig({ font_size: value }); }
+        }
+      };
+    }
+
+    // Map config to edit panel values
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ['event_title', cfg.event_title || defaultConfig.event_title],
+        ['event_subtitle', cfg.event_subtitle || defaultConfig.event_subtitle],
+        ['register_button_text', cfg.register_button_text || defaultConfig.register_button_text]
+      ]);
+    }
+
+    // Initialize SDKs
+    async function init() {
+      // Initialize Element SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities,
+          mapToEditPanelValues
+        });
+      }
+      
+      // Initialize Data SDK
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error('Failed to initialize Data SDK');
+        }
+      }
+      
+      // Setup form handler
+      document.getElementById('registration-form').addEventListener('submit', handleSubmit);
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d79ef3a72cd47c5',t:'MTc3MjcyMjI0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
