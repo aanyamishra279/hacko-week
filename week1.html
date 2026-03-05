@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aanya Mishra - Engineering Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .page-transition {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .skill-bar {
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-6px);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: currentColor;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 2.5rem;
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 0 4px currentColor;
+            opacity: 0.2;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 1.75rem;
+            width: 2px;
+            height: calc(100% - 1rem);
+            background: currentColor;
+            opacity: 0.15;
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: none;
+            }
+            
+            .mobile-menu.active {
+                display: flex;
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-auto">
+  <div id="app" class="w-full h-full"><!-- Navigation -->
+   <nav id="navbar" style="box-shadow: 0 2px 12px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 1.25rem 2rem;">
+     <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h1 id="nav-name" style="font-size: 1.75rem; font-weight: 700; margin: 0; background: linear-gradient(135deg, currentColor, currentColor); -webkit-background-clip: text;"></h1>
+      <div style="display: flex; gap: 2.5rem; align-items: center;"><a href="#home" class="nav-link" style="text-decoration: none; font-weight: 500; font-size: 0.95rem;">Home</a> <a href="#about" class="nav-link" style="text-decoration: none; font-weight: 500; font-size: 0.95rem;">About</a> <a href="#skills" class="nav-link" style="text-decoration: none; font-weight: 500; font-size: 0.95rem;">Skills</a> <a href="#projects" class="nav-link" style="text-decoration: none; font-weight: 500; font-size: 0.95rem;">Projects</a> <a href="#education" class="nav-link" style="text-decoration: none; font-weight: 500; font-size: 0.95rem;">Education</a> <a href="#contact" class="nav-link" style="text-decoration: none; font-weight: 500; font-size: 0.95rem;">Contact</a>
+      </div>
+     </div>
+    </div>
+   </nav><!-- Main Content -->
+   <main id="content" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;"><!-- Pages will be rendered here -->
+   </main><!-- Footer -->
+   <footer id="footer" style="margin-top: 5rem; padding: 2.5rem 2rem; text-align: center; border-top: 1px solid rgba(0,0,0,0.08);">
+    <p id="footer-text" style="margin: 0; font-size: 0.9rem; font-weight: 400;"></p>
+    <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; opacity: 0.6;">Built with passion for engineering and innovation</p>
+   </footer>
+  </div>
+  <script>
+        const defaultConfig = {
+            background_color: "#f1f5f9",
+            surface_color: "#ffffff",
+            text_color: "#0f172a",
+            primary_action_color: "#1e3a8a",
+            secondary_action_color: "#64748b",
+            hero_headline: "Aspiring Engineer & Programmer",
+            hero_intro: "Passionate engineering student combining technical expertise with creative problem-solving to build innovative solutions.",
+            about_summary: "I'm Aanya Mishra, a dedicated B.Tech student at Symbiosis Institute of Technology with a strong foundation in programming and electronics. With academic excellence from DPS Nagpur and hands-on experience in Arduino and web development, I'm committed to creating impactful technological solutions.",
+            student_name: "Aanya Mishra",
+            contact_email: "aanya.mishra@email.com",
+            linkedin_url: "https://linkedin.com/in/aanyamishra",
+            font_family: "Poppins",
+            font_size: 16
+        };
+
+        let currentPage = 'home';
+        
+        const skills = [
+            { name: 'C Programming', level: 80 },
+            { name: 'HTML & CSS', level: 85 },
+            { name: 'JavaScript', level: 75 },
+            { name: 'Arduino Programming', level: 70 },
+            { name: 'Problem Solving', level: 85 },
+            { name: 'Web Development', level: 80 }
+        ];
+        
+        const softSkills = ['Teamwork', 'Communication', 'Adaptability', 'Leadership', 'Time Management', 'Critical Thinking'];
+        
+        const projects = [
+            {
+                title: 'Arduino Uno Traffic Light System',
+                description: 'Automated traffic light control system using Arduino Uno with LED indicators and timing circuits for realistic intersection simulation',
+                tools: ['Arduino Uno', 'C/C++', 'LED Control', 'Circuit Design']
+            },
+            {
+                title: 'Hospital Management Website',
+                description: 'Full-featured hospital website with patient registration, appointment booking, and doctor information using modern web technologies',
+                tools: ['HTML', 'CSS', 'JavaScript', 'Responsive Design']
+            },
+            {
+                title: 'Smart Home Automation',
+                description: 'IoT-based home automation system for controlling lights and appliances remotely using Arduino',
+                tools: ['Arduino', 'Sensors', 'IoT', 'C++']
+            },
+            {
+                title: 'Portfolio Website',
+                description: 'Personal portfolio website showcasing projects and skills with modern UI/UX design principles',
+                tools: ['HTML5', 'CSS3', 'JavaScript', 'Web Design']
+            }
+        ];
+        
+        const education = [
+            {
+                title: 'B.Tech in Computer Engineering',
+                institution: 'Symbiosis Institute of Technology',
+                period: 'Present',
+                details: 'Currently pursuing Bachelor of Technology with focus on software development and electronics'
+            },
+            {
+                title: 'Senior Secondary Education (Class 12th)',
+                institution: 'Delhi Public School, Nagpur',
+                period: 'Completed',
+                details: 'Completed higher secondary education with strong foundation in Mathematics and Science'
+            },
+            {
+                title: 'Arduino & IoT Workshop',
+                institution: 'Technical Workshop',
+                period: '2023',
+                details: 'Hands-on training in Arduino programming and IoT device integration'
+            },
+            {
+                title: 'Web Development Fundamentals',
+                institution: 'Online Learning Platform',
+                period: '2024',
+                details: 'Comprehensive training in HTML, CSS, JavaScript and responsive web design'
+            }
+        ];
+
+        function renderHomePage(config) {
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = '-apple-system, BlinkMacSystemFont, sans-serif';
+            
+            return `
+                <div class="page-transition" style="min-height: 85vh; display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; max-width: 850px;">
+                        <div style="width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 2.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, ${config.primary_action_color}, ${config.primary_action_color}dd); color: white; font-size: ${baseSize * 3.5}px; font-weight: 700; font-family: ${customFont}, ${baseFontStack}; box-shadow: 0 10px 30px ${config.primary_action_color}30;">
+                            ${(config.student_name || defaultConfig.student_name).charAt(0)}
+                        </div>
+                        <p style="font-size: ${baseSize * 0.95}px; color: ${config.primary_action_color}; font-weight: 600; margin-bottom: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; font-family: ${customFont}, ${baseFontStack};">
+                            Engineering Student
+                        </p>
+                        <h1 style="font-size: ${baseSize * 3}px; font-weight: 800; margin-bottom: 1.5rem; color: ${config.text_color}; line-height: 1.2; font-family: ${customFont}, ${baseFontStack};">
+                            ${config.hero_headline || defaultConfig.hero_headline}
+                        </h1>
+                        <p style="font-size: ${baseSize * 1.15}px; color: ${config.secondary_action_color}; margin-bottom: 3rem; line-height: 1.7; font-family: ${customFont}, ${baseFontStack}; max-width: 700px; margin-left: auto; margin-right: auto;">
+                            ${config.hero_intro || defaultConfig.hero_intro}
+                        </p>
+                        <div style="display: flex; gap: 1.25rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="#projects" style="background: ${config.primary_action_color}; color: white; padding: 1rem 2.5rem; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: ${baseSize * 1.05}px; transition: all 0.3s; font-family: ${customFont}, ${baseFontStack}; box-shadow: 0 4px 15px ${config.primary_action_color}40;" 
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px ${config.primary_action_color}50'" 
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px ${config.primary_action_color}40'">
+                                View Projects
+                            </a>
+                            <a href="#contact" style="background: ${config.surface_color}; color: ${config.primary_action_color}; padding: 1rem 2.5rem; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: ${baseSize * 1.05}px; border: 2px solid ${config.primary_action_color}; transition: all 0.3s; font-family: ${customFont}, ${baseFontStack};"
+                               onmouseover="this.style.background='${config.primary_action_color}'; this.style.color='white'; this.style.transform='translateY(-2px)'" 
+                               onmouseout="this.style.background='${config.surface_color}'; this.style.color='${config.primary_action_color}'; this.style.transform='translateY(0)'">
+                                Contact Me
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAboutPage(config) {
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = '-apple-system, BlinkMacSystemFont, sans-serif';
+            
+            return `
+                <div class="page-transition" style="padding: 5rem 0;">
+                    <h2 style="font-size: ${baseSize * 2.5}px; font-weight: 800; margin-bottom: 3rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">About Me</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;">
+                        <div>
+                            <p style="font-size: ${baseSize * 1.05}px; line-height: 1.9; color: ${config.text_color}; margin-bottom: 1.75rem; font-family: ${customFont}, ${baseFontStack}; font-weight: 400;">
+                                ${config.about_summary || defaultConfig.about_summary}
+                            </p>
+                            <p style="font-size: ${baseSize * 1.05}px; line-height: 1.9; color: ${config.secondary_action_color}; font-family: ${customFont}, ${baseFontStack}; font-weight: 400;">
+                                My journey from DPS Nagpur to Symbiosis Institute of Technology has equipped me with a unique blend of theoretical knowledge and practical skills. I thrive on challenges and continuously seek opportunities to learn and grow in the ever-evolving field of technology.
+                            </p>
+                            <div style="margin-top: 2.5rem; padding: 1.75rem; background: linear-gradient(135deg, ${config.primary_action_color}15, ${config.primary_action_color}08); border-radius: 16px; border-left: 4px solid ${config.primary_action_color};">
+                                <p style="font-size: ${baseSize * 0.95}px; color: ${config.text_color}; line-height: 1.7; margin: 0; font-family: ${customFont}, ${baseFontStack}; font-style: italic;">
+                                    "Innovation distinguishes between a leader and a follower. I strive to be at the forefront of technological advancement."
+                                </p>
+                            </div>
+                        </div>
+                        <div style="background: ${config.surface_color}; padding: 2.5rem; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
+                            <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; margin-bottom: 2rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Core Competencies</h3>
+                            <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2.5rem;">
+                                ${['C Programming', 'Web Development', 'Arduino & IoT', 'Problem Solving', 'Circuit Design', 'Team Leadership'].map(skill => `
+                                    <span style="background: ${config.primary_action_color}; color: white; padding: 0.65rem 1.25rem; border-radius: 8px; font-size: ${baseSize * 0.9}px; font-weight: 500; font-family: ${customFont}, ${baseFontStack}; box-shadow: 0 2px 8px ${config.primary_action_color}30;">
+                                        ${skill}
+                                    </span>
+                                `).join('')}
+                            </div>
+                            <div style="padding-top: 2rem; border-top: 2px solid ${config.secondary_action_color}20;">
+                                <h4 style="font-size: ${baseSize * 1.1}px; font-weight: 600; margin-bottom: 1rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Academic Excellence</h4>
+                                <p style="font-size: ${baseSize * 0.95}px; color: ${config.secondary_action_color}; line-height: 1.7; font-family: ${customFont}, ${baseFontStack}; margin-bottom: 1rem;">
+                                    Strong academic foundation from DPS Nagpur with consistent performance in Mathematics and Science.
+                                </p>
+                                <h4 style="font-size: ${baseSize * 1.1}px; font-weight: 600; margin-bottom: 1rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Growth Mindset</h4>
+                                <p style="font-size: ${baseSize * 0.95}px; color: ${config.secondary_action_color}; line-height: 1.7; font-family: ${customFont}, ${baseFontStack}; margin: 0;">
+                                    Passionate about continuous learning and staying updated with emerging technologies and industry trends.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSkillsPage(config) {
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = '-apple-system, BlinkMacSystemFont, sans-serif';
+            
+            return `
+                <div class="page-transition" style="padding: 5rem 0;">
+                    <h2 style="font-size: ${baseSize * 2.5}px; font-weight: 800; margin-bottom: 4rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Skills & Expertise</h2>
+                    
+                    <div style="margin-bottom: 5rem;">
+                        <h3 style="font-size: ${baseSize * 1.75}px; font-weight: 700; margin-bottom: 3rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Technical Skills</h3>
+                        <div style="display: grid; gap: 2rem;">
+                            ${skills.map(skill => `
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                        <span style="font-size: ${baseSize * 1.05}px; font-weight: 600; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">${skill.name}</span>
+                                        <span style="font-size: ${baseSize * 0.95}px; color: ${config.primary_action_color}; font-weight: 600; font-family: ${customFont}, ${baseFontStack};">${skill.level}%</span>
+                                    </div>
+                                    <div style="width: 100%; height: 10px; background: ${config.secondary_action_color}15; border-radius: 10px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                                        <div class="skill-bar" style="width: ${skill.level}%; height: 100%; background: linear-gradient(90deg, ${config.primary_action_color}, ${config.primary_action_color}cc); border-radius: 10px;"></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="font-size: ${baseSize * 1.75}px; font-weight: 700; margin-bottom: 3rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Soft Skills</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                            ${softSkills.map((skill, index) => `
+                                <div class="card-hover" style="background: ${config.surface_color}; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; border-top: 3px solid ${config.primary_action_color};">
+                                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, ${config.primary_action_color}20, ${config.primary_action_color}10); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: ${baseSize * 1.75}px; color: ${config.primary_action_color};">
+                                        ${['👥', '💬', '🔄', '🎯', '⏰', '💡'][index]}
+                                    </div>
+                                    <p style="font-size: ${baseSize * 1.05}px; font-weight: 600; color: ${config.text_color}; margin: 0; font-family: ${customFont}, ${baseFontStack};">${skill}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProjectsPage(config) {
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = '-apple-system, BlinkMacSystemFont, sans-serif';
+            
+            return `
+                <div class="page-transition" style="padding: 5rem 0;">
+                    <h2 style="font-size: ${baseSize * 2.5}px; font-weight: 800; margin-bottom: 4rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Projects & Work</h2>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5rem;">
+                        ${projects.map((project, index) => `
+                            <div class="card-hover" style="background: ${config.surface_color}; padding: 2.5rem; border-radius: 20px; box-shadow: 0 6px 25px rgba(0,0,0,0.1); border-left: 5px solid ${config.primary_action_color}; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: ${config.primary_action_color}10; border-radius: 50%; opacity: 0.5;"></div>
+                                <div style="position: relative; z-index: 1;">
+                                    <div style="display: inline-block; background: ${config.primary_action_color}15; color: ${config.primary_action_color}; padding: 0.4rem 1rem; border-radius: 8px; font-size: ${baseSize * 0.8}px; font-weight: 600; margin-bottom: 1.25rem; font-family: ${customFont}, ${baseFontStack};">
+                                        PROJECT ${index + 1}
+                                    </div>
+                                    <h3 style="font-size: ${baseSize * 1.4}px; font-weight: 700; margin-bottom: 1.25rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack}; line-height: 1.3;">${project.title}</h3>
+                                    <p style="font-size: ${baseSize}px; color: ${config.secondary_action_color}; line-height: 1.7; margin-bottom: 1.75rem; font-family: ${customFont}, ${baseFontStack};">
+                                        ${project.description}
+                                    </p>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 0.65rem;">
+                                        ${project.tools.map(tool => `
+                                            <span style="background: ${config.surface_color}; color: ${config.primary_action_color}; padding: 0.4rem 1rem; border-radius: 8px; font-size: ${baseSize * 0.85}px; font-weight: 500; font-family: ${customFont}, ${baseFontStack}; border: 1.5px solid ${config.primary_action_color}30;">
+                                                ${tool}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEducationPage(config) {
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = '-apple-system, BlinkMacSystemFont, sans-serif';
+            
+            return `
+                <div class="page-transition" style="padding: 5rem 0;">
+                    <h2 style="font-size: ${baseSize * 2.5}px; font-weight: 800; margin-bottom: 4rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Education & Certifications</h2>
+                    <div style="max-width: 900px;">
+                        ${education.map((item, index) => `
+                            <div class="timeline-item" style="color: ${config.primary_action_color}; margin-bottom: ${index === education.length - 1 ? '0' : '3.5rem'};">
+                                <div style="background: ${config.surface_color}; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; overflow: hidden;">
+                                    <div style="position: absolute; top: 0; right: 0; width: 120px; height: 120px; background: ${config.primary_action_color}08; border-radius: 0 0 0 100%;"></div>
+                                    <div style="position: relative; z-index: 1;">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+                                            <h3 style="font-size: ${baseSize * 1.3}px; font-weight: 700; margin: 0; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack}; flex: 1;">${item.title}</h3>
+                                            <span style="font-size: ${baseSize * 0.9}px; color: ${config.surface_color}; background: ${config.primary_action_color}; padding: 0.4rem 1rem; border-radius: 8px; font-weight: 600; white-space: nowrap; font-family: ${customFont}, ${baseFontStack};">${item.period}</span>
+                                        </div>
+                                        <p style="font-size: ${baseSize * 1.05}px; font-weight: 600; color: ${config.primary_action_color}; margin-bottom: 0.75rem; font-family: ${customFont}, ${baseFontStack};">📍 ${item.institution}</p>
+                                        <p style="font-size: ${baseSize * 0.95}px; color: ${config.secondary_action_color}; margin: 0; line-height: 1.7; font-family: ${customFont}, ${baseFontStack};">${item.details}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderContactPage(config) {
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = '-apple-system, BlinkMacSystemFont, sans-serif';
+            
+            return `
+                <div class="page-transition" style="padding: 5rem 0;">
+                    <h2 style="font-size: ${baseSize * 2.5}px; font-weight: 800; margin-bottom: 4rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Get In Touch</h2>
+                    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 4rem;">
+                        <div>
+                            <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; margin-bottom: 2rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Send a Message</h3>
+                            <form id="contactForm" style="display: flex; flex-direction: column; gap: 1.75rem;">
+                                <div>
+                                    <label for="name" style="display: block; font-size: ${baseSize * 0.95}px; font-weight: 600; margin-bottom: 0.65rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Full Name</label>
+                                    <input type="text" id="name" name="name" required style="width: 100%; padding: 1rem; border: 2px solid ${config.secondary_action_color}25; border-radius: 12px; font-size: ${baseSize}px; font-family: ${customFont}, ${baseFontStack}; color: ${config.text_color}; background: ${config.surface_color}; transition: border-color 0.3s;" 
+                                    onfocus="this.style.borderColor='${config.primary_action_color}'" 
+                                    onblur="this.style.borderColor='${config.secondary_action_color}25'" />
+                                </div>
+                                <div>
+                                    <label for="email" style="display: block; font-size: ${baseSize * 0.95}px; font-weight: 600; margin-bottom: 0.65rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Email Address</label>
+                                    <input type="email" id="email" name="email" required style="width: 100%; padding: 1rem; border: 2px solid ${config.secondary_action_color}25; border-radius: 12px; font-size: ${baseSize}px; font-family: ${customFont}, ${baseFontStack}; color: ${config.text_color}; background: ${config.surface_color}; transition: border-color 0.3s;" 
+                                    onfocus="this.style.borderColor='${config.primary_action_color}'" 
+                                    onblur="this.style.borderColor='${config.secondary_action_color}25'" />
+                                </div>
+                                <div>
+                                    <label for="message" style="display: block; font-size: ${baseSize * 0.95}px; font-weight: 600; margin-bottom: 0.65rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Your Message</label>
+                                    <textarea id="message" name="message" rows="6" required style="width: 100%; padding: 1rem; border: 2px solid ${config.secondary_action_color}25; border-radius: 12px; font-size: ${baseSize}px; font-family: ${customFont}, ${baseFontStack}; resize: vertical; color: ${config.text_color}; background: ${config.surface_color}; transition: border-color 0.3s;" 
+                                    onfocus="this.style.borderColor='${config.primary_action_color}'" 
+                                    onblur="this.style.borderColor='${config.secondary_action_color}25'"></textarea>
+                                </div>
+                                <button type="submit" style="background: ${config.primary_action_color}; color: white; padding: 1.125rem; border: none; border-radius: 12px; font-size: ${baseSize * 1.05}px; font-weight: 700; cursor: pointer; transition: all 0.3s; font-family: ${customFont}, ${baseFontStack}; box-shadow: 0 4px 15px ${config.primary_action_color}40;"
+                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px ${config.primary_action_color}50'" 
+                                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px ${config.primary_action_color}40'">
+                                    Send Message →
+                                </button>
+                                <div id="formMessage" style="display: none; padding: 1.25rem; border-radius: 12px; font-size: ${baseSize * 0.95}px; font-family: ${customFont}, ${baseFontStack}; font-weight: 500;"></div>
+                            </form>
+                        </div>
+                        <div>
+                            <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; margin-bottom: 2rem; color: ${config.text_color}; font-family: ${customFont}, ${baseFontStack};">Contact Information</h3>
+                            <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+                                <div style="background: ${config.surface_color}; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid ${config.primary_action_color};">
+                                    <p style="font-size: ${baseSize * 0.85}px; font-weight: 700; color: ${config.secondary_action_color}; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: ${customFont}, ${baseFontStack};">Email</p>
+                                    <a href="mailto:${config.contact_email || defaultConfig.contact_email}" style="font-size: ${baseSize * 1.05}px; color: ${config.primary_action_color}; text-decoration: none; font-weight: 600; font-family: ${customFont}, ${baseFontStack}; display: inline-block; transition: transform 0.2s;"
+                                    onmouseover="this.style.transform='translateX(5px)'"
+                                    onmouseout="this.style.transform='translateX(0)'">
+                                        ${config.contact_email || defaultConfig.contact_email} →
+                                    </a>
+                                </div>
+                                <div style="background: ${config.surface_color}; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid ${config.primary_action_color};">
+                                    <p style="font-size: ${baseSize * 0.85}px; font-weight: 700; color: ${config.secondary_action_color}; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: ${customFont}, ${baseFontStack};">LinkedIn</p>
+                                    <a href="${config.linkedin_url || defaultConfig.linkedin_url}" target="_blank" rel="noopener noreferrer" style="font-size: ${baseSize * 1.05}px; color: ${config.primary_action_color}; text-decoration: none; font-weight: 600; font-family: ${customFont}, ${baseFontStack}; display: inline-block; transition: transform 0.2s;"
+                                    onmouseover="this.style.transform='translateX(5px)'"
+                                    onmouseout="this.style.transform='translateX(0)'">
+                                        Connect on LinkedIn →
+                                    </a>
+                                </div>
+                            </div>
+                            <div style="margin-top: 2.5rem; padding: 2rem; background: linear-gradient(135deg, ${config.primary_action_color}15, ${config.primary_action_color}08); border-radius: 16px; border: 2px dashed ${config.primary_action_color}30;">
+                                <p style="font-size: ${baseSize * 1.05}px; color: ${config.text_color}; line-height: 1.8; margin: 0; font-family: ${customFont}, ${baseFontStack}; font-weight: 500;">
+                                    <span style="font-size: ${baseSize * 1.75}px;">💡</span><br/>
+                                    I'm always excited to discuss new projects, internship opportunities, and innovative ideas. Let's create something amazing together!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPage(page, config) {
+            const content = document.getElementById('content');
+            
+            switch(page) {
+                case 'home':
+                    content.innerHTML = renderHomePage(config);
+                    break;
+                case 'about':
+                    content.innerHTML = renderAboutPage(config);
+                    break;
+                case 'skills':
+                    content.innerHTML = renderSkillsPage(config);
+                    break;
+                case 'projects':
+                    content.innerHTML = renderProjectsPage(config);
+                    break;
+                case 'education':
+                    content.innerHTML = renderEducationPage(config);
+                    break;
+                case 'contact':
+                    content.innerHTML = renderContactPage(config);
+                    setupContactForm(config);
+                    break;
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setupContactForm(config) {
+            const form = document.getElementById('contactForm');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const messageDiv = document.getElementById('formMessage');
+                    const baseSize = config.font_size || defaultConfig.font_size;
+                    const customFont = config.font_family || defaultConfig.font_family;
+                    const baseFontStack = '-apple-system, BlinkMacSystemFont, sans-serif';
+                    
+                    messageDiv.style.display = 'block';
+                    messageDiv.style.background = config.primary_action_color + '20';
+                    messageDiv.style.color = config.primary_action_color;
+                    messageDiv.style.fontSize = baseSize * 0.95 + 'px';
+                    messageDiv.style.fontFamily = `${customFont}, ${baseFontStack}`;
+                    messageDiv.style.borderLeft = '4px solid ' + config.primary_action_color;
+                    messageDiv.textContent = '✓ Thank you for reaching out! I\'ll respond to your message shortly.';
+                    form.reset();
+                    
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 5000);
+                });
+            }
+        }
+
+        function updateStyles(config) {
+            const navbar = document.getElementById('navbar');
+            const footer = document.getElementById('footer');
+            const navName = document.getElementById('nav-name');
+            const footerText = document.getElementById('footer-text');
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = '-apple-system, BlinkMacSystemFont, sans-serif';
+            
+            document.body.style.background = config.background_color || defaultConfig.background_color;
+            document.body.style.color = config.text_color || defaultConfig.text_color;
+            document.body.style.fontSize = baseSize + 'px';
+            document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            navbar.style.background = config.surface_color || defaultConfig.surface_color;
+            footer.style.background = config.surface_color || defaultConfig.surface_color;
+            footer.style.color = config.secondary_action_color || defaultConfig.secondary_action_color;
+            
+            navName.textContent = config.student_name || defaultConfig.student_name;
+            navName.style.color = config.text_color || defaultConfig.text_color;
+            navName.style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            footerText.textContent = `© 2024 ${config.student_name || defaultConfig.student_name}. All rights reserved.`;
+            footerText.style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.style.color = config.text_color || defaultConfig.text_color;
+                link.style.fontFamily = `${customFont}, ${baseFontStack}`;
+                link.addEventListener('mouseover', () => {
+                    link.style.color = config.primary_action_color || defaultConfig.primary_action_color;
+                });
+                link.addEventListener('mouseout', () => {
+                    link.style.color = config.text_color || defaultConfig.text_color;
+                });
+            });
+        }
+
+        async function onConfigChange(config) {
+            updateStyles(config);
+            renderPage(currentPage, config);
+        }
+
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.substring(1) || 'home';
+            currentPage = hash;
+            renderPage(currentPage, window.elementSdk?.config || defaultConfig);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.substring(1) || 'home';
+            currentPage = hash;
+            const config = window.elementSdk?.config || defaultConfig;
+            updateStyles(config);
+            renderPage(currentPage, config);
+        });
+
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities: (config) => ({
+                    recolorables: [
+                        {
+                            get: () => config.background_color || defaultConfig.background_color,
+                            set: (value) => {
+                                config.background_color = value;
+                                window.elementSdk.setConfig({ background_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.surface_color || defaultConfig.surface_color,
+                            set: (value) => {
+                                config.surface_color = value;
+                                window.elementSdk.setConfig({ surface_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.text_color || defaultConfig.text_color,
+                            set: (value) => {
+                                config.text_color = value;
+                                window.elementSdk.setConfig({ text_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                            set: (value) => {
+                                config.primary_action_color = value;
+                                window.elementSdk.setConfig({ primary_action_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+                            set: (value) => {
+                                config.secondary_action_color = value;
+                                window.elementSdk.setConfig({ secondary_action_color: value });
+                            }
+                        }
+                    ],
+                    borderables: [],
+                    fontEditable: {
+                        get: () => config.font_family || defaultConfig.font_family,
+                        set: (value) => {
+                            config.font_family = value;
+                            window.elementSdk.setConfig({ font_family: value });
+                        }
+                    },
+                    fontSizeable: {
+                        get: () => config.font_size || defaultConfig.font_size,
+                        set: (value) => {
+                            config.font_size = value;
+                            window.elementSdk.setConfig({ font_size: value });
+                        }
+                    }
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ['hero_headline', config.hero_headline || defaultConfig.hero_headline],
+                    ['hero_intro', config.hero_intro || defaultConfig.hero_intro],
+                    ['about_summary', config.about_summary || defaultConfig.about_summary],
+                    ['student_name', config.student_name || defaultConfig.student_name],
+                    ['contact_email', config.contact_email || defaultConfig.contact_email],
+                    ['linkedin_url', config.linkedin_url || defaultConfig.linkedin_url]
+                ])
+            });
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d79dffa566147c5',t:'MTc3MjcyMTYxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
