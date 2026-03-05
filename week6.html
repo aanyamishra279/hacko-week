@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Quiz</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    * { font-family: 'DM Sans', sans-serif; }
+    
+    .question-card {
+      animation: slideUp 0.5s ease-out forwards;
+      opacity: 0;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .question-card:nth-child(1) { animation-delay: 0.1s; }
+    .question-card:nth-child(2) { animation-delay: 0.2s; }
+    .question-card:nth-child(3) { animation-delay: 0.3s; }
+    .question-card:nth-child(4) { animation-delay: 0.4s; }
+    .question-card:nth-child(5) { animation-delay: 0.5s; }
+    
+    .radio-option {
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: stretch;
+    }
+    
+    .radio-option label {
+      flex: 1;
+      cursor: pointer;
+    }
+    
+    .radio-option:hover label {
+      transform: translateX(4px);
+    }
+    
+    input[type="radio"] {
+      cursor: pointer;
+    }
+    
+    input[type="radio"]:checked + label {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+      color: white;
+      border-color: transparent;
+    }
+    
+    input[type="radio"]:checked + label .option-letter {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+    
+    .correct-answer {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+      color: white !important;
+      border-color: transparent !important;
+    }
+    
+    .wrong-answer {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+      color: white !important;
+      border-color: transparent !important;
+    }
+    
+    .score-ring {
+      animation: scoreRing 1s ease-out forwards;
+    }
+    
+    @keyframes scoreRing {
+      from {
+        stroke-dashoffset: 283;
+      }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app-wrapper" class="w-full h-full overflow-auto" style="background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%);">
+   <!-- Header -->
+   <header class="pt-8 pb-6 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+     <div class="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full" style="background: #ffffff;">
+      <svg class="w-5 h-5" style="color: #3b82f6;" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      </svg><span class="text-sm font-medium" style="color: #3b82f6;">Knowledge Check</span>
+     </div>
+     <h1 id="quiz-title" class="text-3xl md:text-4xl font-bold mb-3" style="color: #1e3a5f;">Student Quiz</h1>
+     <p id="instruction-text" class="text-base md:text-lg" style="color: #64748b;">Answer the following multiple-choice questions and submit your answers.</p>
+    </div>
+   </header><!-- Score Display (Hidden by default) -->
+   <div id="score-display" class="hidden px-4 pb-6">
+    <div class="max-w-md mx-auto p-6 rounded-2xl shadow-lg text-center" style="background: #ffffff;">
+     <div class="relative w-32 h-32 mx-auto mb-4">
+      <svg class="w-32 h-32 transform -rotate-90">
+       <circle cx="64" cy="64" r="56" stroke="#e2e8f0" stroke-width="8" fill="none" /> <circle id="score-ring" class="score-ring" cx="64" cy="64" r="56" stroke="#3b82f6" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="352" stroke-dashoffset="352" />
+      </svg>
+      <div class="absolute inset-0 flex items-center justify-center">
+       <span id="score-text" class="text-3xl font-bold" style="color: #1e3a5f;">0/5</span>
+      </div>
+     </div>
+     <h2 id="score-message" class="text-xl font-semibold mb-2" style="color: #1e3a5f;">Quiz Complete!</h2>
+     <p id="score-subtitle" class="text-sm" style="color: #64748b;">Review your answers below</p>
+    </div>
+   </div><!-- Quiz Form -->
+   <form id="quiz-form" class="px-4 pb-8">
+    <div class="max-w-3xl mx-auto space-y-5">
+     <!-- Question 1 -->
+     <div class="question-card p-5 md:p-6 rounded-2xl shadow-sm" style="background: #ffffff;">
+      <div class="flex items-start gap-4">
+       <span class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">1</span>
+       <div class="flex-1">
+        <h3 class="text-lg font-semibold mb-4" style="color: #1e3a5f;">What does CPU stand for?</h3>
+        <fieldset>
+         <legend class="sr-only">Question 1 options</legend>
+         <div class="space-y-2">
+          <div class="radio-option">
+           <input type="radio" id="q1a" name="q1" value="a" class="sr-only peer"> <label for="q1a" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">A</span> <span class="font-medium" style="color: #334155;">Computer Personal Unit</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q1b" name="q1" value="b" class="sr-only peer"> <label for="q1b" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">B</span> <span class="font-medium" style="color: #334155;">Central Processing Unit</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q1c" name="q1" value="c" class="sr-only peer"> <label for="q1c" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">C</span> <span class="font-medium" style="color: #334155;">Central Program Utility</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q1d" name="q1" value="d" class="sr-only peer"> <label for="q1d" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">D</span> <span class="font-medium" style="color: #334155;">Computer Processing Utility</span> </label>
+          </div>
+         </div>
+        </fieldset>
+       </div>
+      </div>
+     </div><!-- Question 2 -->
+     <div class="question-card p-5 md:p-6 rounded-2xl shadow-sm" style="background: #ffffff;">
+      <div class="flex items-start gap-4">
+       <span class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">2</span>
+       <div class="flex-1">
+        <h3 class="text-lg font-semibold mb-4" style="color: #1e3a5f;">Which planet is known as the Red Planet?</h3>
+        <fieldset>
+         <legend class="sr-only">Question 2 options</legend>
+         <div class="space-y-2">
+          <div class="radio-option">
+           <input type="radio" id="q2a" name="q2" value="a" class="sr-only peer"> <label for="q2a" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">A</span> <span class="font-medium" style="color: #334155;">Venus</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q2b" name="q2" value="b" class="sr-only peer"> <label for="q2b" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">B</span> <span class="font-medium" style="color: #334155;">Mars</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q2c" name="q2" value="c" class="sr-only peer"> <label for="q2c" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">C</span> <span class="font-medium" style="color: #334155;">Jupiter</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q2d" name="q2" value="d" class="sr-only peer"> <label for="q2d" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">D</span> <span class="font-medium" style="color: #334155;">Saturn</span> </label>
+          </div>
+         </div>
+        </fieldset>
+       </div>
+      </div>
+     </div><!-- Question 3 -->
+     <div class="question-card p-5 md:p-6 rounded-2xl shadow-sm" style="background: #ffffff;">
+      <div class="flex items-start gap-4">
+       <span class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">3</span>
+       <div class="flex-1">
+        <h3 class="text-lg font-semibold mb-4" style="color: #1e3a5f;">What is the binary equivalent of the decimal number 10?</h3>
+        <fieldset>
+         <legend class="sr-only">Question 3 options</legend>
+         <div class="space-y-2">
+          <div class="radio-option">
+           <input type="radio" id="q3a" name="q3" value="a" class="sr-only peer"> <label for="q3a" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">A</span> <span class="font-medium" style="color: #334155;">1010</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q3b" name="q3" value="b" class="sr-only peer"> <label for="q3b" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">B</span> <span class="font-medium" style="color: #334155;">1100</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q3c" name="q3" value="c" class="sr-only peer"> <label for="q3c" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">C</span> <span class="font-medium" style="color: #334155;">1001</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q3d" name="q3" value="d" class="sr-only peer"> <label for="q3d" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">D</span> <span class="font-medium" style="color: #334155;">1110</span> </label>
+          </div>
+         </div>
+        </fieldset>
+       </div>
+      </div>
+     </div><!-- Question 4 -->
+     <div class="question-card p-5 md:p-6 rounded-2xl shadow-sm" style="background: #ffffff;">
+      <div class="flex items-start gap-4">
+       <span class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">4</span>
+       <div class="flex-1">
+        <h3 class="text-lg font-semibold mb-4" style="color: #1e3a5f;">Who developed the theory of relativity?</h3>
+        <fieldset>
+         <legend class="sr-only">Question 4 options</legend>
+         <div class="space-y-2">
+          <div class="radio-option">
+           <input type="radio" id="q4a" name="q4" value="a" class="sr-only peer"> <label for="q4a" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">A</span> <span class="font-medium" style="color: #334155;">Isaac Newton</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q4b" name="q4" value="b" class="sr-only peer"> <label for="q4b" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">B</span> <span class="font-medium" style="color: #334155;">Nikola Tesla</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q4c" name="q4" value="c" class="sr-only peer"> <label for="q4c" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">C</span> <span class="font-medium" style="color: #334155;">Albert Einstein</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q4d" name="q4" value="d" class="sr-only peer"> <label for="q4d" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">D</span> <span class="font-medium" style="color: #334155;">Stephen Hawking</span> </label>
+          </div>
+         </div>
+        </fieldset>
+       </div>
+      </div>
+     </div><!-- Question 5 -->
+     <div class="question-card p-5 md:p-6 rounded-2xl shadow-sm" style="background: #ffffff;">
+      <div class="flex items-start gap-4">
+       <span class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">5</span>
+       <div class="flex-1">
+        <h3 class="text-lg font-semibold mb-4" style="color: #1e3a5f;">What does HTML stand for?</h3>
+        <fieldset>
+         <legend class="sr-only">Question 5 options</legend>
+         <div class="space-y-2">
+          <div class="radio-option">
+           <input type="radio" id="q5a" name="q5" value="a" class="sr-only peer"> <label for="q5a" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">A</span> <span class="font-medium" style="color: #334155;">Hyper Text Markup Language</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q5b" name="q5" value="b" class="sr-only peer"> <label for="q5b" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">B</span> <span class="font-medium" style="color: #334155;">High Tech Modern Language</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q5c" name="q5" value="c" class="sr-only peer"> <label for="q5c" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">C</span> <span class="font-medium" style="color: #334155;">Home Tool Markup Language</span> </label>
+          </div>
+          <div class="radio-option">
+           <input type="radio" id="q5d" name="q5" value="d" class="sr-only peer"> <label for="q5d" class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer" style="border-color: #e2e8f0; background: #f8fafc;"> <span class="option-letter w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm" style="background: #e2e8f0; color: #64748b;">D</span> <span class="font-medium" style="color: #334155;">Hyperlinks Text Mark Language</span> </label>
+          </div>
+         </div>
+        </fieldset>
+       </div>
+      </div>
+     </div><!-- Buttons -->
+     <div class="flex flex-col sm:flex-row gap-3 pt-4">
+      <button type="submit" id="submit-btn" class="flex-1 py-4 px-6 rounded-xl font-semibold text-white text-lg transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+       </svg> Submit Quiz </button> <button type="button" id="reset-btn" class="flex-1 sm:flex-none sm:px-8 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 hover:shadow-md active:scale-[0.98] flex items-center justify-center gap-2" style="background: #ffffff; color: #64748b; border: 2px solid #e2e8f0;">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+       </svg> Reset </button>
+     </div>
+    </div>
+   </form><!-- Footer -->
+   <footer class="pb-8 px-4 text-center">
+    <p class="text-sm" style="color: #94a3b8;">© 2024 Student Quiz Portal • Good luck with your quiz!</p>
+   </footer>
+  </div>
+  <script>
+    // Quiz configuration
+    const correctAnswers = {
+      q1: 'b', // Central Processing Unit
+      q2: 'b', // Mars
+      q3: 'a', // 1010
+      q4: 'c', // Albert Einstein
+      q5: 'a'  // Hyper Text Markup Language
+    };
+    
+    const defaultConfig = {
+      quiz_title: 'Student Quiz',
+      instruction_text: 'Answer the following multiple-choice questions and submit your answers.'
+    };
+    
+    let quizSubmitted = false;
+    
+    // Element SDK initialization
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          document.getElementById('quiz-title').textContent = config.quiz_title || defaultConfig.quiz_title;
+          document.getElementById('instruction-text').textContent = config.instruction_text || defaultConfig.instruction_text;
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['quiz_title', config.quiz_title || defaultConfig.quiz_title],
+          ['instruction_text', config.instruction_text || defaultConfig.instruction_text]
+        ])
+      });
+    }
+    
+    // Form submission
+    document.getElementById('quiz-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (quizSubmitted) return;
+      
+      let score = 0;
+      let allAnswered = true;
+      
+      // Check each answer
+      for (let i = 1; i <= 5; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selected) {
+          allAnswered = false;
+          const card = document.querySelector(`.question-card:nth-child(${i})`);
+          card.style.boxShadow = '0 0 0 2px #ef4444';
+          setTimeout(() => card.style.boxShadow = '', 2000);
+        }
+      }
+      
+      if (!allAnswered) {
+        showToast('Please answer all questions before submitting!', 'warning');
+        return;
+      }
+      
+      quizSubmitted = true;
+      
+      // Calculate score and show results
+      for (let i = 1; i <= 5; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const correctValue = correctAnswers[`q${i}`];
+        const correctLabel = document.querySelector(`label[for="q${i}${correctValue}"]`);
+        const selectedLabel = document.querySelector(`label[for="${selected.id}"]`);
+        
+        if (selected.value === correctValue) {
+          score++;
+          selectedLabel.classList.add('correct-answer');
+        } else {
+          selectedLabel.classList.add('wrong-answer');
+          correctLabel.classList.add('correct-answer');
+        }
+        
+        // Disable all radio buttons
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(input => {
+          input.disabled = true;
+        });
+      }
+      
+      // Show score display
+      const scoreDisplay = document.getElementById('score-display');
+      scoreDisplay.classList.remove('hidden');
+      
+      // Update score text
+      document.getElementById('score-text').textContent = `${score}/5`;
+      
+      // Animate score ring
+      const scoreRing = document.getElementById('score-ring');
+      const percentage = score / 5;
+      const circumference = 352;
+      const offset = circumference - (percentage * circumference);
+      scoreRing.style.strokeDashoffset = offset;
+      
+      // Update score message
+      const scoreMessage = document.getElementById('score-message');
+      const scoreSubtitle = document.getElementById('score-subtitle');
+      
+      if (score === 5) {
+        scoreMessage.textContent = '🎉 Perfect Score!';
+        scoreSubtitle.textContent = 'Outstanding! You got all questions right!';
+        scoreRing.style.stroke = '#10b981';
+      } else if (score >= 4) {
+        scoreMessage.textContent = '👏 Great Job!';
+        scoreSubtitle.textContent = 'Excellent performance!';
+        scoreRing.style.stroke = '#3b82f6';
+      } else if (score >= 3) {
+        scoreMessage.textContent = '👍 Good Effort!';
+        scoreSubtitle.textContent = 'Keep practicing to improve!';
+        scoreRing.style.stroke = '#f59e0b';
+      } else {
+        scoreMessage.textContent = '📚 Keep Learning!';
+        scoreSubtitle.textContent = 'Review the material and try again!';
+        scoreRing.style.stroke = '#ef4444';
+      }
+      
+      // Scroll to score display
+      scoreDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      // Update submit button
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.textContent = 'Quiz Submitted';
+      submitBtn.disabled = true;
+      submitBtn.style.background = '#94a3b8';
+      submitBtn.style.cursor = 'not-allowed';
+    });
+    
+    // Reset button
+    document.getElementById('reset-btn').addEventListener('click', function() {
+      quizSubmitted = false;
+      
+      // Reset form
+      document.getElementById('quiz-form').reset();
+      
+      // Remove answer styling
+      document.querySelectorAll('label').forEach(label => {
+        label.classList.remove('correct-answer', 'wrong-answer');
+      });
+      
+      // Enable all radio buttons
+      document.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.disabled = false;
+      });
+      
+      // Hide score display
+      document.getElementById('score-display').classList.add('hidden');
+      
+      // Reset score ring
+      document.getElementById('score-ring').style.strokeDashoffset = '352';
+      document.getElementById('score-ring').style.stroke = '#3b82f6';
+      
+      // Reset submit button
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Submit Quiz
+      `;
+      submitBtn.disabled = false;
+      submitBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+      submitBtn.style.cursor = 'pointer';
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      showToast('Quiz has been reset!', 'success');
+    });
+    
+    // Toast notification function
+    function showToast(message, type) {
+      const existing = document.querySelector('.toast-notification');
+      if (existing) existing.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 font-medium';
+      
+      if (type === 'warning') {
+        toast.style.background = '#fef3c7';
+        toast.style.color = '#92400e';
+        toast.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          ${message}
+        `;
+      } else {
+        toast.style.background = '#d1fae5';
+        toast.style.color = '#065f46';
+        toast.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          ${message}
+        `;
+      }
+      
+      document.body.appendChild(toast);
+      
+      toast.style.animation = 'slideUp 0.3s ease-out';
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d7a089205fa693a',t:'MTc3MjcyMzI4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
