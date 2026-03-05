@@ -3,313 +3,568 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>La Cucina Bella</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <title>Restaurant Menu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Lora:wght@400;500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-cream: #FDF6E9;
-      --surface-warm: #FFF8F0;
-      --text-dark: #3D2314;
-      --primary-red: #C41E3A;
-      --accent-orange: #E85D04;
+    body {
+      box-sizing: border-box;
+    }
+    
+    .font-playfair {
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .font-inter {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .ornament {
+      background: linear-gradient(90deg, transparent, currentColor, transparent);
+      height: 1px;
+    }
+    
+    .menu-item {
+      transition: all 0.3s ease;
+    }
+    
+    .menu-item:hover {
+      transform: translateX(8px);
+    }
+    
+    .category-card {
+      transition: all 0.3s ease;
+    }
+    
+    .category-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(101, 67, 33, 0.15);
+    }
+    
+    .dot-pattern {
+      background-image: radial-gradient(circle, rgba(101, 67, 33, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
     }
   </style>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            cream: '#FDF6E9',
-            warmSurface: '#FFF8F0',
-            textDark: '#3D2314',
-            primaryRed: '#C41E3A',
-            accentOrange: '#E85D04'
-          },
-          fontFamily: {
-            display: ['Playfair Display', 'serif'],
-            body: ['Lora', 'serif']
-          }
-        }
-      }
-    }
-  </script>
-  <style>body { box-sizing: border-box; }</style>
+  <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full bg-cream">
-  <div id="app-wrapper" class="w-full h-full overflow-auto"><!-- Hero Banner -->
-   <header class="relative w-full bg-gradient-to-br from-primaryRed via-primaryRed to-accentOrange overflow-hidden"><!-- Decorative Pattern -->
-    <div class="absolute inset-0 opacity-10">
-     <svg class="w-full h-full" viewbox="0 0 100 100" preserveaspectratio="none"><defs>
-       <pattern id="grain" x="0" y="0" width="20" height="20" patternunits="userSpaceOnUse">
-        <circle cx="10" cy="10" r="1" fill="white" />
-        <circle cx="5" cy="5" r="0.5" fill="white" />
-        <circle cx="15" cy="15" r="0.5" fill="white" />
-       </pattern>
-      </defs> <rect width="100" height="100" fill="url(#grain)" />
-     </svg>
-    </div>
-    <div class="relative z-10 px-6 py-12 md:py-20 text-center"><!-- Logo Icon -->
-     <div class="mb-4 flex justify-center">
-      <div class="w-20 h-20 md:w-24 md:h-24 bg-cream rounded-full flex items-center justify-center shadow-lg">
-       <svg class="w-12 h-12 md:w-14 md:h-14 text-primaryRed" viewbox="0 0 24 24" fill="currentColor"><path d="M12 2C13.1 2 14 2.9 14 4C14 4.74 13.6 5.39 13 5.73V7H14C15.1 7 16 7.9 16 9V10H17C18.1 10 19 10.9 19 12V14H20V20H4V14H5V12C5 10.9 5.9 10 7 10H8V9C8 7.9 8.9 7 10 7H11V5.73C10.4 5.39 10 4.74 10 4C10 2.9 10.9 2 12 2ZM7 14V18H17V14H7Z" />
-       </svg>
-      </div>
+ <body class="h-full overflow-auto" style="background-color: #f5f1e8;">
+  <div id="app-wrapper" class="min-h-full w-full"><!-- Header Section -->
+   <header class="py-16 md:py-24 text-center dot-pattern relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#f5f1e8]"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4"><!-- Decorative Top Ornament -->
+     <div class="flex items-center justify-center mb-6">
+      <svg class="w-12 h-12 text-[#654321]" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2L9 8H3L8 12L6 18L12 14L18 18L16 12L21 8H15L12 2Z" />
+      </svg>
      </div>
-     <h1 id="restaurant-name" class="font-display text-4xl md:text-6xl font-bold text-cream mb-3 drop-shadow-lg">La Cucina Bella</h1>
-     <p id="tagline" class="font-body text-lg md:text-xl text-cream/90 italic">Authentic Italian Flavors Since 1985</p><!-- Decorative Divider -->
-     <div class="mt-8 flex items-center justify-center gap-4">
-      <div class="w-16 md:w-24 h-px bg-cream/40"></div><span class="text-cream text-2xl">🍝</span>
-      <div class="w-16 md:w-24 h-px bg-cream/40"></div>
+     <h1 id="restaurant-name" class="font-playfair text-5xl md:text-7xl font-bold mb-4" style="color: #654321;">Bella Cucina</h1>
+     <div class="flex items-center justify-center gap-3 mb-6">
+      <div class="w-16 h-px bg-[#654321] opacity-40"></div>
+      <svg class="w-4 h-4 text-[#654321] opacity-60" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="10" r="2" />
+      </svg>
+      <div class="w-16 h-px bg-[#654321] opacity-40"></div>
      </div>
+     <p id="tagline" class="font-inter text-lg md:text-xl tracking-wide" style="color: #6b5d4f;">Authentic Italian Cuisine Since 1985</p>
     </div>
    </header><!-- Menu Content -->
-   <main class="w-full max-w-6xl mx-auto px-4 md:px-8 py-12"><!-- Starters Section -->
+   <main class="max-w-6xl mx-auto px-4 py-12 md:py-16"><!-- Starters Category -->
     <section class="mb-16">
-     <div class="flex items-center gap-4 mb-8"><span class="text-3xl">🥗</span>
-      <h2 class="font-display text-3xl md:text-4xl font-semibold text-primaryRed">Starters</h2>
-      <div class="flex-1 h-px bg-gradient-to-r from-accentOrange/50 to-transparent"></div>
+     <div class="text-center mb-10">
+      <div class="inline-flex items-center gap-3 mb-3"><span class="text-3xl">🍽️</span>
+       <h2 class="font-playfair text-3xl md:text-4xl font-semibold" style="color: #654321;">Starters</h2><span class="text-3xl">🍽️</span>
+      </div>
+      <div class="ornament w-32 mx-auto" style="color: #8b7355;"></div>
      </div>
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><!-- Bruschetta -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Classic Bruschetta</h3>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Grilled ciabatta topped with fresh tomatoes, garlic, basil, and extra virgin olive oil</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$8.50</span>
+     <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?w=400&amp;h=200&amp;fit=crop" alt="Bruschetta" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Bruschetta Classica</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Fresh tomatoes, basil, garlic, and olive oil on toasted bread</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹680</span>
+        </div>
        </div>
-      </div><!-- Calamari -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Crispy Calamari</h3>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Tender squid rings lightly fried, served with zesty marinara and lemon aioli</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$12.00</span>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1608897013039-887f21d8c804?w=400&amp;h=200&amp;fit=crop" alt="Caprese Salad" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Caprese Salad</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Buffalo mozzarella, vine tomatoes, basil, balsamic glaze</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹960</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1633436457344-52efde773b8b?w=400&amp;h=200&amp;fit=crop" alt="Arancini" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Arancini Siciliani</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Crispy risotto balls stuffed with mozzarella and peas</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹840</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&amp;h=200&amp;fit=crop" alt="Calamari" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Calamari Fritti</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Crispy fried squid rings with lemon aioli and marinara</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹1,120</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1553163147-622ab57be1c7?w=400&amp;h=200&amp;fit=crop" alt="Antipasto" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Antipasto Platter</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Assorted cured meats, cheeses, olives, and grilled vegetables</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹1,440</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&amp;h=200&amp;fit=crop" alt="Soup" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Minestrone Soup</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Traditional Italian vegetable soup with pasta and herbs</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹720</span>
+        </div>
        </div>
       </div>
      </div>
-    </section><!-- Main Course Section -->
+    </section><!-- Divider -->
+    <div class="flex items-center justify-center my-12">
+     <div class="w-24 h-px bg-[#8b7355] opacity-30"></div>
+     <svg class="w-6 h-6 mx-4 text-[#8b7355] opacity-50" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /> <circle cx="12" cy="12" r="3" />
+     </svg>
+     <div class="w-24 h-px bg-[#8b7355] opacity-30"></div>
+    </div><!-- Main Course Category -->
     <section class="mb-16">
-     <div class="flex items-center gap-4 mb-8"><span class="text-3xl">🍝</span>
-      <h2 class="font-display text-3xl md:text-4xl font-semibold text-primaryRed">Main Course</h2>
-      <div class="flex-1 h-px bg-gradient-to-r from-accentOrange/50 to-transparent"></div>
+     <div class="text-center mb-10">
+      <div class="inline-flex items-center gap-3 mb-3"><span class="text-3xl">🍝</span>
+       <h2 class="font-playfair text-3xl md:text-4xl font-semibold" style="color: #654321;">Main Course</h2><span class="text-3xl">🍝</span>
+      </div>
+      <div class="ornament w-32 mx-auto" style="color: #8b7355;"></div>
      </div>
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><!-- Spaghetti -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <div class="flex items-center gap-2">
-          <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Spaghetti Carbonara</h3><span class="px-2 py-0.5 bg-primaryRed/10 text-primaryRed text-xs font-semibold rounded-full">Popular</span>
-         </div>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Creamy egg sauce with crispy pancetta, parmesan, and cracked black pepper</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$18.00</span>
+     <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&amp;h=200&amp;fit=crop" alt="Carbonara" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Spaghetti Carbonara</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Classic Roman pasta with pancetta, eggs, pecorino cheese</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹1,760</span>
+        </div>
        </div>
-      </div><!-- Risotto -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Wild Mushroom Risotto</h3>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Arborio rice slow-cooked with porcini, shiitake, and aged parmesan</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$19.50</span>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1476124369491-7a6313a27c4f?w=400&amp;h=200&amp;fit=crop" alt="Risotto" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Risotto ai Funghi</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Creamy arborio rice with wild mushrooms and parmesan</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹1,920</span>
+        </div>
        </div>
-      </div><!-- Chicken -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Chicken Parmigiana</h3>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Breaded chicken breast with tomato sauce, melted mozzarella, and fresh basil</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$22.00</span>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=400&amp;h=200&amp;fit=crop" alt="Osso Buco" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Osso Buco Milanese</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Braised veal shanks with saffron risotto and gremolata</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹2,560</span>
+        </div>
        </div>
-      </div><!-- Salmon -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <div class="flex items-center gap-2">
-          <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Grilled Salmon</h3><span class="px-2 py-0.5 bg-green-600/10 text-green-700 text-xs font-semibold rounded-full">Chef's Choice</span>
-         </div>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Atlantic salmon with lemon butter, capers, served over roasted vegetables</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$26.00</span>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&amp;h=200&amp;fit=crop" alt="Fish" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Branzino al Forno</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Oven-roasted Mediterranean sea bass with herbs and lemon</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹2,240</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=400&amp;h=200&amp;fit=crop" alt="Chicken Parmesan" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Pollo alla Parmigiana</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Breaded chicken breast with marinara and melted mozzarella</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹2,080</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=400&amp;h=200&amp;fit=crop" alt="Lasagna" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Lasagna Bolognese</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Layered pasta with meat sauce, béchamel, and parmesan</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹1,840</span>
+        </div>
        </div>
       </div>
      </div>
-    </section><!-- Beverages Section -->
+    </section><!-- Divider -->
+    <div class="flex items-center justify-center my-12">
+     <div class="w-24 h-px bg-[#8b7355] opacity-30"></div>
+     <svg class="w-6 h-6 mx-4 text-[#8b7355] opacity-50" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /> <circle cx="12" cy="12" r="3" />
+     </svg>
+     <div class="w-24 h-px bg-[#8b7355] opacity-30"></div>
+    </div><!-- Breads Category -->
     <section class="mb-16">
-     <div class="flex items-center gap-4 mb-8"><span class="text-3xl">🍷</span>
-      <h2 class="font-display text-3xl md:text-4xl font-semibold text-primaryRed">Beverages</h2>
-      <div class="flex-1 h-px bg-gradient-to-r from-accentOrange/50 to-transparent"></div>
+     <div class="text-center mb-10">
+      <div class="inline-flex items-center gap-3 mb-3"><span class="text-3xl">🥖</span>
+       <h2 class="font-playfair text-3xl md:text-4xl font-semibold" style="color: #654321;">Breads</h2><span class="text-3xl">🥖</span>
+      </div>
+      <div class="ornament w-32 mx-auto" style="color: #8b7355;"></div>
      </div>
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><!-- House Wine -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">House Red Wine</h3>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Smooth Italian Chianti with notes of cherry and oak</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$9.00</span>
+     <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1590753160812-83f10b0f68ea?w=400&amp;h=200&amp;fit=crop" alt="Focaccia" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Focaccia Rosmarino</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Homemade flatbread with rosemary and olive oil</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹480</span>
+        </div>
        </div>
-      </div><!-- Limoncello -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Limoncello Spritz</h3>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Refreshing lemon liqueur with prosecco and sparkling water</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$11.00</span>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&amp;h=200&amp;fit=crop" alt="Ciabatta" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Ciabatta Bread</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Traditional Italian bread with crispy crust</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹440</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400&amp;h=200&amp;fit=crop" alt="Garlic Bread" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Garlic Bread</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Toasted bread with garlic butter and parsley</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹400</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=400&amp;h=200&amp;fit=crop" alt="Bread" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Pane Toscano</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Tuscan bread baked fresh daily</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹360</span>
+        </div>
        </div>
       </div>
      </div>
-    </section><!-- Desserts Section -->
-    <section class="mb-12">
-     <div class="flex items-center gap-4 mb-8"><span class="text-3xl">🍰</span>
-      <h2 class="font-display text-3xl md:text-4xl font-semibold text-primaryRed">Desserts</h2>
-      <div class="flex-1 h-px bg-gradient-to-r from-accentOrange/50 to-transparent"></div>
+    </section><!-- Divider -->
+    <div class="flex items-center justify-center my-12">
+     <div class="w-24 h-px bg-[#8b7355] opacity-30"></div>
+     <svg class="w-6 h-6 mx-4 text-[#8b7355] opacity-50" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /> <circle cx="12" cy="12" r="3" />
+     </svg>
+     <div class="w-24 h-px bg-[#8b7355] opacity-30"></div>
+    </div><!-- Desserts Category -->
+    <section class="mb-16">
+     <div class="text-center mb-10">
+      <div class="inline-flex items-center gap-3 mb-3"><span class="text-3xl">🍰</span>
+       <h2 class="font-playfair text-3xl md:text-4xl font-semibold" style="color: #654321;">Desserts</h2><span class="text-3xl">🍰</span>
+      </div>
+      <div class="ornament w-32 mx-auto" style="color: #8b7355;"></div>
      </div>
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><!-- Tiramisu -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <div class="flex items-center gap-2">
-          <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Classic Tiramisu</h3><span class="px-2 py-0.5 bg-primaryRed/10 text-primaryRed text-xs font-semibold rounded-full">Must Try</span>
-         </div>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Layers of espresso-soaked ladyfingers with mascarpone cream and cocoa</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$9.50</span>
+     <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&amp;h=200&amp;fit=crop" alt="Tiramisu" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Tiramisu Classico</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Coffee-soaked ladyfingers with mascarpone cream</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹720</span>
+        </div>
        </div>
-      </div><!-- Panna Cotta -->
-      <div class="menu-card bg-warmSurface rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-accentOrange/10 hover:border-accentOrange/30 group">
-       <div class="flex justify-between items-start gap-4">
-        <div class="flex-1">
-         <h3 class="font-display text-xl font-semibold text-textDark group-hover:text-primaryRed transition-colors">Vanilla Panna Cotta</h3>
-         <p class="font-body text-textDark/70 mt-2 text-sm leading-relaxed">Silky Italian cream custard with fresh berry compote and mint</p>
-        </div><span class="font-display text-xl font-bold text-accentOrange whitespace-nowrap">$8.00</span>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&amp;h=200&amp;fit=crop" alt="Panna Cotta" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Panna Cotta</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Vanilla cream custard with berry compote</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹680</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1600804340584-c7aaa0d3dfc3?w=400&amp;h=200&amp;fit=crop" alt="Cannoli" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Cannoli Siciliani</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Crispy pastry tubes filled with sweet ricotta cream</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹600</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&amp;h=200&amp;fit=crop" alt="Gelato" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Gelato Artigianale</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Artisan Italian ice cream - ask for today's flavors</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹520</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1519915212116-7cfef71f1d3e?w=400&amp;h=200&amp;fit=crop" alt="Tart" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Torta della Nonna</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Grandmother's lemon custard tart with pine nuts</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹640</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1514066558159-fc8c737ef259?w=400&amp;h=200&amp;fit=crop" alt="Affogato" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Affogato</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Vanilla gelato "drowned" in hot espresso</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹560</span>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section><!-- Divider -->
+    <div class="flex items-center justify-center my-12">
+     <div class="w-24 h-px bg-[#8b7355] opacity-30"></div>
+     <svg class="w-6 h-6 mx-4 text-[#8b7355] opacity-50" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /> <circle cx="12" cy="12" r="3" />
+     </svg>
+     <div class="w-24 h-px bg-[#8b7355] opacity-30"></div>
+    </div><!-- Beverages Category -->
+    <section class="mb-16">
+     <div class="text-center mb-10">
+      <div class="inline-flex items-center gap-3 mb-3"><span class="text-3xl">☕</span>
+       <h2 class="font-playfair text-3xl md:text-4xl font-semibold" style="color: #654321;">Beverages</h2><span class="text-3xl">☕</span>
+      </div>
+      <div class="ornament w-32 mx-auto" style="color: #8b7355;"></div>
+     </div>
+     <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=400&amp;h=200&amp;fit=crop" alt="Espresso" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Espresso</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Rich Italian espresso from freshly ground beans</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹280</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&amp;h=200&amp;fit=crop" alt="Cappuccino" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Cappuccino</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Espresso with steamed milk and foam</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹360</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&amp;h=200&amp;fit=crop" alt="Water" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">San Pellegrino</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Sparkling mineral water from Italian springs</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹320</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&amp;h=200&amp;fit=crop" alt="Wine" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">House Wine</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Red or white wine by the glass</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹640</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1523677011781-c91d1bbe2f6d?w=400&amp;h=200&amp;fit=crop" alt="Lemonade" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Limonata</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Freshly squeezed lemonade with mint</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹400</span>
+        </div>
+       </div>
+      </div>
+      <div class="category-card bg-white rounded-lg overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&amp;h=200&amp;fit=crop" alt="Latte" loading="lazy" class="w-full h-40 object-cover" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #f5f1e8 0%, #e8e0d5 100%)'; this.alt='Image unavailable';">
+       <div class="p-6">
+        <div class="flex justify-between items-start gap-4 menu-item">
+         <div class="flex-1">
+          <h3 class="font-playfair text-xl font-semibold mb-2" style="color: #654321;">Caffè Latte</h3>
+          <p class="text-sm leading-relaxed" style="color: #8b7355;">Espresso with steamed milk and light foam</p>
+         </div><span class="font-inter font-semibold text-lg whitespace-nowrap" style="color: #654321;">₹360</span>
+        </div>
        </div>
       </div>
      </div>
     </section>
    </main><!-- Footer -->
-   <footer class="w-full bg-gradient-to-br from-textDark to-textDark/90 text-cream py-10 px-6">
-    <div class="max-w-4xl mx-auto text-center">
-     <div class="mb-4 flex justify-center">
-      <svg class="w-10 h-10 text-accentOrange" viewbox="0 0 24 24" fill="currentColor"><path d="M12 2C13.1 2 14 2.9 14 4C14 4.74 13.6 5.39 13 5.73V7H14C15.1 7 16 7.9 16 9V10H17C18.1 10 19 10.9 19 12V14H20V20H4V14H5V12C5 10.9 5.9 10 7 10H8V9C8 7.9 8.9 7 10 7H11V5.73C10.4 5.39 10 4.74 10 4C10 2.9 10.9 2 12 2ZM7 14V18H17V14H7Z" />
-      </svg>
+   <footer class="py-12 border-t-2" style="background-color: #e8e0d5; border-color: #c9b896;">
+    <div class="max-w-4xl mx-auto px-4">
+     <div class="grid md:grid-cols-3 gap-8 text-center md:text-left">
+      <div>
+       <h3 class="font-playfair text-lg font-semibold mb-3" style="color: #654321;">📍 Address</h3>
+       <p id="address" class="text-sm leading-relaxed" style="color: #6b5d4f;">123 Via Roma<br>
+         Florence, Italy 50122</p>
+      </div>
+      <div>
+       <h3 class="font-playfair text-lg font-semibold mb-3" style="color: #654321;">📞 Contact</h3>
+       <p id="phone" class="text-sm leading-relaxed" style="color: #6b5d4f;">+39 055 123 4567<br>
+         info@bellacucina.it</p>
+      </div>
+      <div>
+       <h3 class="font-playfair text-lg font-semibold mb-3" style="color: #654321;">🕒 Hours</h3>
+       <p id="hours" class="text-sm leading-relaxed" style="color: #6b5d4f;">Mon-Thu: 12:00 - 22:00<br>
+         Fri-Sun: 12:00 - 23:00</p>
+      </div>
      </div>
-     <p id="footer-text" class="font-body text-cream/80 text-sm mb-4">Open Daily: 11:00 AM - 10:00 PM | Reservations: (555) 123-4567</p>
-     <p class="font-body text-cream/50 text-xs">© 2024 La Cucina Bella. All rights reserved.</p>
+     <div class="mt-8 pt-6 border-t text-center" style="border-color: #c9b896;">
+      <p class="text-sm" style="color: #8b7355;">© 2024 Bella Cucina. All rights reserved.</p>
+     </div>
     </div>
    </footer>
   </div>
   <script>
+    // Default configuration
     const defaultConfig = {
-      restaurant_name: "La Cucina Bella",
-      tagline: "Authentic Italian Flavors Since 1985",
-      footer_text: "Open Daily: 11:00 AM - 10:00 PM | Reservations: (555) 123-4567",
-      background_color: "#FDF6E9",
-      surface_color: "#FFF8F0",
-      text_color: "#3D2314",
-      primary_color: "#C41E3A",
-      accent_color: "#E85D04"
+      restaurant_name: 'Bella Cucina',
+      tagline: 'Authentic Italian Cuisine Since 1985',
+      address: '123 Via Roma\nFlorence, Italy 50122',
+      phone: '+39 055 123 4567\ninfo@bellacucina.it',
+      hours: 'Mon-Thu: 12:00 - 22:00\nFri-Sun: 12:00 - 23:00',
+      background_color: '#f5f1e8',
+      surface_color: '#ffffff',
+      text_color: '#6b5d4f',
+      primary_action_color: '#654321',
+      secondary_action_color: '#8b7355',
+      font_family: 'Inter',
+      font_size: 16
     };
 
-    async function onConfigChange(config) {
+    let config = { ...defaultConfig };
+
+    // Apply configuration to UI
+    async function onConfigChange(cfg) {
+      config = { ...defaultConfig, ...cfg };
+      
       // Update text content
       document.getElementById('restaurant-name').textContent = config.restaurant_name || defaultConfig.restaurant_name;
       document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
-      document.getElementById('footer-text').textContent = config.footer_text || defaultConfig.footer_text;
-
-      // Update colors
-      const bgColor = config.background_color || defaultConfig.background_color;
-      const surfaceColor = config.surface_color || defaultConfig.surface_color;
-      const textColor = config.text_color || defaultConfig.text_color;
-      const primaryColor = config.primary_color || defaultConfig.primary_color;
-      const accentColor = config.accent_color || defaultConfig.accent_color;
-
-      // Apply background color
-      document.body.style.backgroundColor = bgColor;
-
-      // Apply surface color to menu cards
-      document.querySelectorAll('.menu-card').forEach(card => {
-        card.style.backgroundColor = surfaceColor;
-      });
-
-      // Apply text color
-      document.querySelectorAll('.font-body').forEach(el => {
-        if (!el.closest('header') && !el.closest('footer')) {
-          el.style.color = textColor;
-        }
-      });
-
-      // Apply primary color to headings
-      document.querySelectorAll('section h2').forEach(h2 => {
-        h2.style.color = primaryColor;
-      });
-
-      // Apply accent color to prices
-      document.querySelectorAll('.menu-card span.font-display').forEach(price => {
-        price.style.color = accentColor;
-      });
-
-      // Update header gradient
-      const header = document.querySelector('header');
-      header.style.background = `linear-gradient(135deg, ${primaryColor}, ${primaryColor}, ${accentColor})`;
-
-      // Update footer background
-      document.querySelector('footer').style.background = `linear-gradient(135deg, ${textColor}, ${textColor}ee)`;
+      
+      // Update footer content with line breaks
+      const addressEl = document.getElementById('address');
+      addressEl.innerHTML = (config.address || defaultConfig.address).replace(/\n/g, '<br>');
+      
+      const phoneEl = document.getElementById('phone');
+      phoneEl.innerHTML = (config.phone || defaultConfig.phone).replace(/\n/g, '<br>');
+      
+      const hoursEl = document.getElementById('hours');
+      hoursEl.innerHTML = (config.hours || defaultConfig.hours).replace(/\n/g, '<br>');
+      
+      // Apply colors
+      document.body.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      
+      // Apply font
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${fontFamily}, Inter, sans-serif`;
+      
+      // Apply font size scaling
+      const baseSize = config.font_size || defaultConfig.font_size;
+      document.getElementById('restaurant-name').style.fontSize = `${baseSize * 4}px`;
+      document.getElementById('tagline').style.fontSize = `${baseSize * 1.25}px`;
     }
 
-    function mapToCapabilities(config) {
+    // Map config to capabilities
+    function mapToCapabilities(cfg) {
       return {
         recolorables: [
           {
-            get: () => config.background_color || defaultConfig.background_color,
-            set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
+            get: () => cfg.background_color || defaultConfig.background_color,
+            set: (value) => { cfg.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
           },
           {
-            get: () => config.surface_color || defaultConfig.surface_color,
-            set: (value) => { config.surface_color = value; window.elementSdk.setConfig({ surface_color: value }); }
+            get: () => cfg.surface_color || defaultConfig.surface_color,
+            set: (value) => { cfg.surface_color = value; window.elementSdk.setConfig({ surface_color: value }); }
           },
           {
-            get: () => config.text_color || defaultConfig.text_color,
-            set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+            get: () => cfg.text_color || defaultConfig.text_color,
+            set: (value) => { cfg.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
           },
           {
-            get: () => config.primary_color || defaultConfig.primary_color,
-            set: (value) => { config.primary_color = value; window.elementSdk.setConfig({ primary_color: value }); }
+            get: () => cfg.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => { cfg.primary_action_color = value; window.elementSdk.setConfig({ primary_action_color: value }); }
           },
           {
-            get: () => config.accent_color || defaultConfig.accent_color,
-            set: (value) => { config.accent_color = value; window.elementSdk.setConfig({ accent_color: value }); }
+            get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => { cfg.secondary_action_color = value; window.elementSdk.setConfig({ secondary_action_color: value }); }
           }
         ],
         borderables: [],
         fontEditable: {
-          get: () => config.font_family || 'Playfair Display',
-          set: (value) => { config.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
+          get: () => cfg.font_family || defaultConfig.font_family,
+          set: (value) => { cfg.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
         },
         fontSizeable: {
-          get: () => config.font_size || 16,
-          set: (value) => { config.font_size = value; window.elementSdk.setConfig({ font_size: value }); }
+          get: () => cfg.font_size || defaultConfig.font_size,
+          set: (value) => { cfg.font_size = value; window.elementSdk.setConfig({ font_size: value }); }
         }
       };
     }
 
-    function mapToEditPanelValues(config) {
+    // Map config to edit panel values
+    function mapToEditPanelValues(cfg) {
       return new Map([
-        ["restaurant_name", config.restaurant_name || defaultConfig.restaurant_name],
-        ["tagline", config.tagline || defaultConfig.tagline],
-        ["footer_text", config.footer_text || defaultConfig.footer_text]
+        ['restaurant_name', cfg.restaurant_name || defaultConfig.restaurant_name],
+        ['tagline', cfg.tagline || defaultConfig.tagline],
+        ['address', cfg.address || defaultConfig.address],
+        ['phone', cfg.phone || defaultConfig.phone],
+        ['hours', cfg.hours || defaultConfig.hours]
       ]);
     }
 
-    // Initialize SDK
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities,
-        mapToEditPanelValues
-      });
+    // Initialize Element SDK
+    async function init() {
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities,
+          mapToEditPanelValues
+        });
+      }
     }
+
+    init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d79ec4f3665c08b',t:'MTc3MjcyMjEyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d79ef3a163d1397',t:'MTc3MjcyMjI0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
