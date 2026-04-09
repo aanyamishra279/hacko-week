@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Book Catalog</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; margin: 0; }
+    .font-display { font-family: 'Space Mono', monospace; }
+    .font-body { font-family: 'DM Sans', sans-serif; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-in { animation: slideIn 0.3s ease-out; }
+
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .pulse-soft { animation: pulse-soft 1.5s ease-in-out infinite; }
+
+    .book-card {
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--surface-color);
+    }
+    .book-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .book-card.empty-slot {
+      justify-content: center;
+      align-items: center;
+      min-height: 140px;
+      border-style: dashed;
+      opacity: 0.5;
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: var(--border-color); }
+
+    .input-field {
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text-color);
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { outline: none; border-color: var(--accent-color); }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-content {
+      background: var(--surface-color);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 450px;
+      width: 90%;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent-color);
+      color: white;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease-out;
+      z-index: 100;
+    }
+
+    .shelf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-box {
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+    .stat-box .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-color);
+      margin-bottom: 4px;
+    }
+    .stat-box .label {
+      font-size: 12px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full font-body" style="background: var(--bg-color); color: var(--text-color);">
+  <div id="app" class="w-full h-full overflow-auto flex flex-col" style="background: var(--bg-color);"><!-- Header -->
+   <header class="border-b" style="border-color: var(--border-color); background: linear-gradient(135deg, var(--accent-color), rgba(56, 189, 248, 0.8));">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+     <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+       <div class="text-3xl">
+        📚
+       </div>
+       <div>
+        <h1 id="siteTitle" class="font-display text-2xl font-bold text-white"></h1>
+        <p class="text-xs text-white opacity-80 mt-1">Fixed-Size Array Catalog System</p>
+       </div>
+      </div><button id="addBtn" class="btn-primary"> <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Add Book </button>
+     </div><!-- Stats -->
+     <div class="grid grid-cols-3 gap-3">
+      <div class="stat-box">
+       <div class="value" id="bookCount">
+        0
+       </div>
+       <div class="label">
+        Books
+       </div>
+      </div>
+      <div class="stat-box">
+       <div class="value" id="capacityDisplay">
+        10
+       </div>
+       <div class="label">
+        Capacity
+       </div>
+      </div>
+      <div class="stat-box">
+       <div class="value" id="spaceLeft">
+        10
+       </div>
+       <div class="label">
+        Slots Left
+       </div>
+      </div>
+     </div>
+    </div>
+   </header><!-- Main Content -->
+   <main class="flex-1 max-w-6xl mx-auto w-full px-6 py-10"><!-- Empty State -->
+    <div id="emptyState" class="text-center py-12">
+     <div class="text-4xl mb-4">
+      📖
+     </div>
+     <p class="text-lg opacity-70 mb-2">Your library is empty</p>
+     <p class="text-sm opacity-50 mb-6">Add your first book to get started</p><button id="addBtnEmpty" class="btn-primary mx-auto"> <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Add First Book </button>
+    </div><!-- Books Grid -->
+    <div id="booksGrid" class="shelf-grid hidden"></div><!-- Capacity Warning -->
+    <div id="fullWarning" class="hidden mt-6 p-4 rounded-12 text-sm flex items-center gap-3" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5;"><i data-lucide="alert-circle" style="width: 18px; height: 18px; flex-shrink: 0;"></i> <span>Your shelf is full! Remove a book to add another.</span>
+    </div>
+   </main><!-- Footer -->
+   <footer class="text-center py-4 text-xs opacity-40 font-display border-t" style="border-color: var(--border-color);">
+    Array capacity is fixed at initialization • O(n) operations for remove
+   </footer>
+  </div><!-- Add Book Modal -->
+  <div id="addModal" class="modal-overlay hidden">
+   <div class="modal-content">
+    <h2 class="font-display text-lg font-bold mb-4">Add Book to Catalog</h2>
+    <div class="space-y-4 mb-6">
+     <div><label class="text-xs font-semibold opacity-70 mb-1 block">Book Title *</label> <input id="inputTitle" type="text" placeholder="e.g., The Great Gatsby" class="input-field w-full">
+     </div>
+     <div><label class="text-xs font-semibold opacity-70 mb-1 block">Author *</label> <input id="inputAuthor" type="text" placeholder="e.g., F. Scott Fitzgerald" class="input-field w-full">
+     </div>
+     <div><label class="text-xs font-semibold opacity-70 mb-1 block">ISBN (optional)</label> <input id="inputISBN" type="text" placeholder="e.g., 978-0-7432-7356-5" class="input-field w-full">
+     </div>
+    </div>
+    <div class="flex gap-3"><button id="cancelBtn" class="btn-secondary flex-1" onclick="closeAddModal()">Cancel</button> <button id="submitBtn" class="btn-primary flex-1" onclick="submitBook()"> <i data-lucide="check" style="width: 16px; height: 16px;"></i> Add Book </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    // CSS Variables
+    const rootStyle = document.documentElement.style;
+    function applyColors(cfg) {
+      rootStyle.setProperty('--bg-color', cfg.bg_color);
+      rootStyle.setProperty('--surface-color', cfg.surface_color);
+      rootStyle.setProperty('--text-color', cfg.text_color);
+      rootStyle.setProperty('--accent-color', cfg.accent_color);
+      rootStyle.setProperty('--border-color', cfg.border_color);
+    }
+
+    const defaultConfig = {
+      site_title: "📚 Library Book Catalog",
+      max_books: "10",
+      bg_color: "#0f172a",
+      surface_color: "#1e293b",
+      text_color: "#e2e8f0",
+      accent_color: "#38bdf8",
+      border_color: "#334155",
+      font_family: "DM Sans",
+      font_size: 16
+    };
+
+    applyColors(defaultConfig);
+
+    // Global state
+    let config = { ...defaultConfig };
+    let books = [];
+    let maxCapacity = parseInt(defaultConfig.max_books) || 10;
+    let isSubmitting = false;
+
+    // Data Handler
+    const dataHandler = {
+      onDataChanged(data) {
+        books = data.sort((a, b) => new Date(b.added_date) - new Date(a.added_date));
+        renderBooks();
+      }
+    };
+
+    // Initialize Data SDK
+    async function initializeDataSDK() {
+      const result = await window.dataSdk.init(dataHandler);
+      if (result.isError) {
+        console.error("Data SDK init failed:", result.error);
+      }
+    }
+
+    function renderBooks() {
+      const bookCount = books.length;
+      const spacesLeft = maxCapacity - bookCount;
+      document.getElementById('bookCount').textContent = bookCount;
+      document.getElementById('capacityDisplay').textContent = maxCapacity;
+      document.getElementById('spaceLeft').textContent = spacesLeft;
+
+      const gridEl = document.getElementById('booksGrid');
+      const emptyEl = document.getElementById('emptyState');
+      const fullWarning = document.getElementById('fullWarning');
+
+      if (bookCount === 0) {
+        gridEl.classList.add('hidden');
+        emptyEl.classList.remove('hidden');
+        fullWarning.classList.add('hidden');
+      } else {
+        gridEl.classList.remove('hidden');
+        emptyEl.classList.add('hidden');
+
+        // Render books and empty slots
+        let html = '';
+        books.forEach((book, idx) => {
+          html += `
+            <div class="book-card slide-in">
+              <div class="flex items-start justify-between mb-2">
+                <div class="text-2xl opacity-50">[${idx}]</div>
+                <button class="btn-secondary" onclick="deleteBook('${book.__backendId}')" title="Remove from shelf">
+                  <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                </button>
+              </div>
+              <p class="font-semibold text-sm leading-snug">${book.title}</p>
+              <p class="text-xs opacity-60">${book.author}</p>
+              ${book.isbn ? `<p class="text-xs opacity-40">ISBN: ${book.isbn}</p>` : ''}
+              <p class="text-xs opacity-30 mt-2">${new Date(book.added_date).toLocaleDateString()}</p>
+            </div>
+          `;
+        });
+
+        // Add empty slots
+        for (let i = bookCount; i < maxCapacity; i++) {
+          html += `
+            <div class="book-card empty-slot">
+              <div class="text-center">
+                <div class="text-3xl opacity-30 mb-2">[${i}]</div>
+                <p class="text-xs opacity-40">Empty</p>
+              </div>
+            </div>
+          `;
+        }
+
+        gridEl.innerHTML = html;
+
+        // Show/hide full warning
+        if (bookCount >= maxCapacity) {
+          fullWarning.classList.remove('hidden');
+        } else {
+          fullWarning.classList.add('hidden');
+        }
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openAddModal() {
+      const maxCap = parseInt(config.max_books) || 10;
+      if (books.length >= maxCap) {
+        showToast("Shelf is full! Remove a book to add another.");
+        return;
+      }
+      document.getElementById('addModal').classList.remove('hidden');
+      document.getElementById('inputTitle').focus();
+    }
+
+    function closeAddModal() {
+      document.getElementById('addModal').classList.add('hidden');
+      document.getElementById('inputTitle').value = '';
+      document.getElementById('inputAuthor').value = '';
+      document.getElementById('inputISBN').value = '';
+      isSubmitting = false;
+      document.getElementById('submitBtn').disabled = false;
+    }
+
+    async function submitBook() {
+      const title = document.getElementById('inputTitle').value.trim();
+      const author = document.getElementById('inputAuthor').value.trim();
+      const isbn = document.getElementById('inputISBN').value.trim();
+
+      if (!title || !author) {
+        showToast("Please fill in title and author");
+        return;
+      }
+
+      if (books.length >= maxCapacity) {
+        showToast("Shelf is full! Remove a book to add another.");
+        return;
+      }
+
+      isSubmitting = true;
+      document.getElementById('submitBtn').disabled = true;
+
+      const result = await window.dataSdk.create({
+        title,
+        author,
+        isbn: isbn || "",
+        added_date: new Date().toISOString()
+      });
+
+      if (result.isOk) {
+        showToast(`"${title}" added to your library!`);
+        closeAddModal();
+      } else {
+        showToast("Failed to add book. Try again.");
+        isSubmitting = false;
+        document.getElementById('submitBtn').disabled = false;
+      }
+    }
+
+    async function deleteBook(bookId) {
+      const book = books.find(b => b.__backendId === bookId);
+      if (!book) return;
+
+      const confirmDelete = confirm(`Remove "${book.title}" from your library?`);
+      if (!confirmDelete) return;
+
+      const result = await window.dataSdk.delete(book);
+      if (result.isOk) {
+        showToast(`"${book.title}" removed.`);
+      } else {
+        showToast("Failed to remove book.");
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Event Listeners
+    document.getElementById('addBtn').addEventListener('click', openAddModal);
+    document.getElementById('addBtnEmpty').addEventListener('click', openAddModal);
+    document.getElementById('inputTitle').addEventListener('keypress', (e) => { if (e.key === 'Enter') submitBook(); });
+    document.getElementById('inputAuthor').addEventListener('keypress', (e) => { if (e.key === 'Enter') submitBook(); });
+
+    document.getElementById('addModal').addEventListener('click', (e) => {
+      if (e.target.id === 'addModal') closeAddModal();
+    });
+
+    // Element SDK
+    function applyConfig(cfg) {
+      config = { ...defaultConfig, ...cfg };
+      maxCapacity = parseInt(config.max_books) || 10;
+      document.getElementById('siteTitle').textContent = config.site_title || defaultConfig.site_title;
+      applyColors({
+        bg_color: config.bg_color || defaultConfig.bg_color,
+        surface_color: config.surface_color || defaultConfig.surface_color,
+        text_color: config.text_color || defaultConfig.text_color,
+        accent_color: config.accent_color || defaultConfig.accent_color,
+        border_color: config.border_color || defaultConfig.border_color,
+      });
+      document.body.style.color = config.text_color || defaultConfig.text_color;
+      document.getElementById('app').style.background = config.bg_color || defaultConfig.bg_color;
+
+      const ff = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${ff}, DM Sans, sans-serif`;
+      const bs = config.font_size || defaultConfig.font_size;
+      document.body.style.fontSize = bs + 'px';
+
+      renderBooks();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (cfg) => applyConfig(cfg),
+      mapToCapabilities: (cfg) => ({
+        recolorables: [
+          { get: () => cfg.bg_color || defaultConfig.bg_color, set: (v) => { cfg.bg_color = v; window.elementSdk.setConfig({ bg_color: v }); } },
+          { get: () => cfg.surface_color || defaultConfig.surface_color, set: (v) => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+          { get: () => cfg.text_color || defaultConfig.text_color, set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+          { get: () => cfg.accent_color || defaultConfig.accent_color, set: (v) => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+          { get: () => cfg.border_color || defaultConfig.border_color, set: (v) => { cfg.border_color = v; window.elementSdk.setConfig({ border_color: v }); } }
+        ],
+        borderables: [],
+        fontEditable: { get: () => cfg.font_family || defaultConfig.font_family, set: (v) => { cfg.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+        fontSizeable: { get: () => cfg.font_size || defaultConfig.font_size, set: (v) => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+      }),
+      mapToEditPanelValues: (cfg) => new Map([
+        ["site_title", cfg.site_title || defaultConfig.site_title],
+        ["max_books", cfg.max_books || defaultConfig.max_books]
+      ])
+    });
+
+    // Initialize
+    applyConfig(window.elementSdk.config);
+    initializeDataSDK();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e9713b8847c1340',t:'MTc3NTcxMjE3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
