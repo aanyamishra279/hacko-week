@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Navigation Stack</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Outfit:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    @keyframes stackPush {
+      from { transform: translateY(-60px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes stackPop {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-60px); opacity: 0; }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
+    }
+    @keyframes slideIn {
+      from { transform: translateX(30px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .stack-push { animation: stackPush 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .stack-pop { animation: stackPop 0.3s ease-in forwards; }
+    .glow-pulse { animation: pulseGlow 2s infinite; }
+    .slide-in { animation: slideIn 0.4s ease-out; }
+    .fade-up { animation: fadeUp 0.5s ease-out both; }
+    .stack-item-top { border-left: 3px solid #38bdf8; background: linear-gradient(90deg, rgba(56,189,248,0.12) 0%, rgba(15,23,42,0) 100%); }
+    .stack-item-rest { border-left: 3px solid #334155; }
+    .browser-bar { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+    .op-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 10px; border-radius: 9999px; font-size: 11px;
+      font-family: 'JetBrains Mono', monospace; font-weight: 600; text-transform: uppercase;
+    }
+    .toast-msg {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      padding: 10px 20px; border-radius: 10px; font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      z-index: 100; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast-msg.show { opacity: 1; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full" style="margin:0;">
+  <div id="app" class="h-full w-full overflow-auto" style="background: linear-gradient(160deg, #020617 0%, #0f172a 40%, #020617 100%); font-family: 'Outfit', sans-serif;"><!-- Header -->
+   <header class="px-6 py-8 text-center fade-up" style="animation-delay:0s">
+    <div class="inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full" style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2);"><i data-lucide="layers" style="width:16px;height:16px;color:#38bdf8;"></i> <span style="color:#38bdf8; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600;">DATA STRUCTURES</span>
+    </div>
+    <h1 id="mainTitle" class="text-3xl md:text-4xl font-bold mb-2" style="color:#f1f5f9;">Browser Navigation using Stack</h1>
+    <p id="subtitle" class="max-w-xl mx-auto" style="color:#64748b; font-size:15px; line-height:1.6;">Understanding how browsers use stacks for back &amp; forward navigation</p>
+   </header><!-- Main Content -->
+   <div class="max-w-6xl mx-auto px-4 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-6"><!-- Left: Browser Sim + Controls -->
+    <div class="lg:col-span-7 space-y-5"><!-- Simulated Browser -->
+     <div class="fade-up rounded-2xl overflow-hidden" style="animation-delay:0.1s; border:1px solid #1e293b; background:#0f172a;">
+      <div class="browser-bar flex items-center gap-3 px-4 py-3" style="border-bottom:1px solid #1e293b;">
+       <div class="flex gap-1.5"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></span> <span style="width:10px;height:10px;border-radius:50%;background:#eab308;"></span> <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;"></span>
+       </div>
+       <div class="flex items-center gap-2"><button id="btnBack" onclick="goBack()" class="p-1.5 rounded-lg transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed" style="color:#94a3b8;"> <i data-lucide="chevron-left" style="width:18px;height:18px;"></i> </button> <button id="btnForward" onclick="goForward()" class="p-1.5 rounded-lg transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed" style="color:#94a3b8;"> <i data-lucide="chevron-right" style="width:18px;height:18px;"></i> </button>
+       </div>
+       <div id="urlBar" class="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:rgba(255,255,255,0.05); border:1px solid #1e293b;"><i data-lucide="globe" style="width:14px;height:14px;color:#475569;"></i> <span style="color:#94a3b8; font-family:'JetBrains Mono',monospace; font-size:13px;">No page visited yet</span>
+       </div>
+      </div>
+      <div id="browserContent" class="flex items-center justify-center" style="min-height:200px; color:#334155;">
+       <div class="text-center"><i data-lucide="globe" style="width:48px;height:48px;margin:0 auto 12px; color:#1e293b;"></i>
+        <p style="font-size:14px;">Visit a page to begin</p>
+       </div>
+      </div>
+     </div><!-- Page Navigation Buttons -->
+     <div class="fade-up" style="animation-delay:0.2s;">
+      <p class="mb-3" style="color:#64748b; font-size:13px; font-family:'JetBrains Mono',monospace;">VISIT A PAGE</p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="pageButtons"></div>
+     </div><!-- Operation Log -->
+     <div class="fade-up rounded-2xl p-4" style="animation-delay:0.3s; border:1px solid #1e293b; background:#0f172a;">
+      <div class="flex items-center justify-between mb-3">
+       <div class="flex items-center gap-2"><i data-lucide="terminal" style="width:16px;height:16px;color:#38bdf8;"></i> <span style="color:#94a3b8; font-size:13px; font-family:'JetBrains Mono',monospace;">OPERATION LOG</span>
+       </div><button onclick="clearLog()" class="px-2 py-1 rounded text-xs transition-all hover:bg-white/10" style="color:#475569; font-family:'JetBrains Mono',monospace;">Clear</button>
+      </div>
+      <div id="opLog" class="space-y-1 overflow-auto" style="max-height:160px; font-family:'JetBrains Mono',monospace; font-size:12px;">
+       <div style="color:#334155;">
+        No operations yet...
+       </div>
+      </div>
+     </div>
+    </div><!-- Right: Stacks Visualization -->
+    <div class="lg:col-span-5 space-y-5"><!-- Back Stack -->
+     <div class="fade-up rounded-2xl p-5" style="animation-delay:0.15s; border:1px solid #1e293b; background:#0f172a;">
+      <div class="flex items-center justify-between mb-4">
+       <div class="flex items-center gap-2">
+        <div class="p-1.5 rounded-lg" style="background:rgba(56,189,248,0.15);"><i data-lucide="arrow-left" style="width:16px;height:16px;color:#38bdf8;"></i>
+        </div><span class="font-semibold" style="color:#e2e8f0; font-size:15px;">Back Stack</span>
+       </div><span id="backCount" class="op-badge" style="background:rgba(56,189,248,0.1); color:#38bdf8;">0 items</span>
+      </div>
+      <div class="flex items-start gap-3">
+       <div class="flex flex-col items-center" style="color:#334155; font-size:10px; font-family:'JetBrains Mono',monospace;"><span>TOP</span>
+        <div style="width:1px;height:100%;min-height:40px;background:linear-gradient(180deg,#38bdf8,transparent);"></div>
+       </div>
+       <div id="backStack" class="flex-1 space-y-1.5 min-h-[60px]">
+        <div class="text-center py-4" style="color:#1e293b; font-size:13px; border:1px dashed #1e293b; border-radius:8px;">
+         Empty
+        </div>
+       </div>
+      </div>
+     </div><!-- Current Page -->
+     <div class="fade-up rounded-2xl p-5 glow-pulse" style="animation-delay:0.25s; border:1px solid rgba(56,189,248,0.3); background: linear-gradient(135deg, rgba(56,189,248,0.08) 0%, #0f172a 100%);">
+      <div class="flex items-center gap-2 mb-3"><i data-lucide="monitor" style="width:16px;height:16px;color:#38bdf8;"></i> <span style="color:#38bdf8; font-size:12px; font-family:'JetBrains Mono',monospace; font-weight:600;">CURRENT PAGE (PEEK)</span>
+      </div>
+      <div id="currentPage" class="text-center py-3 rounded-xl" style="background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.15);"><span style="color:#475569; font-size:14px;">None</span>
+      </div>
+     </div><!-- Forward Stack -->
+     <div class="fade-up rounded-2xl p-5" style="animation-delay:0.35s; border:1px solid #1e293b; background:#0f172a;">
+      <div class="flex items-center justify-between mb-4">
+       <div class="flex items-center gap-2">
+        <div class="p-1.5 rounded-lg" style="background:rgba(168,85,247,0.15);"><i data-lucide="arrow-right" style="width:16px;height:16px;color:#a855f7;"></i>
+        </div><span class="font-semibold" style="color:#e2e8f0; font-size:15px;">Forward Stack</span>
+       </div><span id="fwdCount" class="op-badge" style="background:rgba(168,85,247,0.1); color:#a855f7;">0 items</span>
+      </div>
+      <div class="flex items-start gap-3">
+       <div class="flex flex-col items-center" style="color:#334155; font-size:10px; font-family:'JetBrains Mono',monospace;"><span>TOP</span>
+        <div style="width:1px;height:100%;min-height:40px;background:linear-gradient(180deg,#a855f7,transparent);"></div>
+       </div>
+       <div id="fwdStack" class="flex-1 space-y-1.5 min-h-[60px]">
+        <div class="text-center py-4" style="color:#1e293b; font-size:13px; border:1px dashed #1e293b; border-radius:8px;">
+         Empty
+        </div>
+       </div>
+      </div>
+     </div><!-- How It Works -->
+     <div class="fade-up rounded-2xl p-5" style="animation-delay:0.45s; border:1px solid #1e293b; background:#0f172a;">
+      <div class="flex items-center gap-2 mb-4"><i data-lucide="info" style="width:16px;height:16px;color:#38bdf8;"></i> <span class="font-semibold" style="color:#e2e8f0; font-size:15px;">How It Works</span>
+      </div>
+      <div class="space-y-3" style="font-size:13px; color:#94a3b8; line-height:1.6;">
+       <div class="flex gap-3 items-start"><span class="op-badge shrink-0" style="background:rgba(34,197,94,0.15); color:#22c55e; margin-top:2px;">PUSH</span> <span>Visiting a new page <strong style="color:#e2e8f0;">pushes</strong> the current page onto the Back Stack and clears the Forward Stack.</span>
+       </div>
+       <div class="flex gap-3 items-start"><span class="op-badge shrink-0" style="background:rgba(239,68,68,0.15); color:#ef4444; margin-top:2px;">POP</span> <span>Clicking <strong style="color:#e2e8f0;">Back</strong> pops from Back Stack; clicking <strong style="color:#e2e8f0;">Forward</strong> pops from Forward Stack.</span>
+       </div>
+       <div class="flex gap-3 items-start"><span class="op-badge shrink-0" style="background:rgba(56,189,248,0.15); color:#38bdf8; margin-top:2px;">PEEK</span> <span>The <strong style="color:#e2e8f0;">current page</strong> is always the top element — visible without removing it.</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div id="toast" class="toast-msg" style="background:#1e293b; border:1px solid #334155; color:#e2e8f0;"></div>
+  </div>
+  <script>
+  const pages = [
+    { name: "google.com", icon: "search", color: "#38bdf8" },
+    { name: "github.com", icon: "github", color: "#a855f7" },
+    { name: "youtube.com", icon: "play", color: "#ef4444" },
+    { name: "stackoverflow.com", icon: "help-circle", color: "#f59e0b" },
+    { name: "wikipedia.org", icon: "book-open", color: "#22c55e" },
+    { name: "reddit.com", icon: "message-circle", color: "#f97316" }
+  ];
+
+  let backStack = [];
+  let forwardStack = [];
+  let currentPageData = null;
+  let logEntries = [];
+
+  const defaultConfig = {
+    main_title: "Browser Navigation using Stack",
+    subtitle: "Understanding how browsers use stacks for back & forward navigation",
+    background_color: "#020617",
+    surface_color: "#0f172a",
+    text_color: "#f1f5f9",
+    accent_color: "#38bdf8",
+    secondary_accent: "#a855f7",
+    font_family: "Outfit",
+    font_size: 16
+  };
+
+  function initPageButtons() {
+    const container = document.getElementById('pageButtons');
+    container.innerHTML = pages.map(p => `
+      <button onclick="visitPage('${p.name}')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+        style="background:rgba(255,255,255,0.04); border:1px solid #1e293b; color:#cbd5e1; font-size:13px; font-family:'JetBrains Mono',monospace;">
+        <i data-lucide="${p.icon}" style="width:15px;height:15px;color:${p.color};"></i>
+        ${p.name}
+      </button>
+    `).join('');
+    lucide.createIcons();
+  }
+
+  function getPageData(name) {
+    return pages.find(p => p.name === name) || { name, icon: "globe", color: "#38bdf8" };
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function addLog(op, detail) {
+    const colors = { PUSH: "#22c55e", POP: "#ef4444", PEEK: "#38bdf8", CLEAR: "#f59e0b", VISIT: "#a855f7" };
+    logEntries.unshift({ op, detail, time: new Date().toLocaleTimeString() });
+    if (logEntries.length > 30) logEntries.pop();
+    const container = document.getElementById('opLog');
+    container.innerHTML = logEntries.map(e => `
+      <div class="flex items-center gap-2 py-1 slide-in" style="border-bottom:1px solid rgba(255,255,255,0.03);">
+        <span class="op-badge" style="background:${colors[e.op]}22; color:${colors[e.op]};">${e.op}</span>
+        <span style="color:#64748b;">${e.detail}</span>
+        <span style="color:#1e293b; margin-left:auto; font-size:10px;">${e.time}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderStack(id, stack, color) {
+    const container = document.getElementById(id);
+    if (stack.length === 0) {
+      container.innerHTML = `<div class="text-center py-4" style="color:#1e293b; font-size:13px; border:1px dashed #1e293b; border-radius:8px;">Empty</div>`;
+      return;
+    }
+    container.innerHTML = stack.slice().reverse().map((item, i) => {
+      const pg = getPageData(item);
+      const isTop = i === 0;
+      return `<div class="flex items-center gap-2 px-3 py-2 rounded-lg stack-push ${isTop ? 'stack-item-top' : 'stack-item-rest'}" style="border-left-color:${isTop ? color : '#334155'}; ${isTop ? `background:linear-gradient(90deg,${color}18,transparent)` : 'background:rgba(255,255,255,0.02)'};">
+        <i data-lucide="${pg.icon}" style="width:14px;height:14px;color:${pg.color};"></i>
+        <span style="color:${isTop ? '#e2e8f0' : '#64748b'}; font-family:'JetBrains Mono',monospace; font-size:12px;">${item}</span>
+        ${isTop ? `<span style="margin-left:auto;font-size:10px;color:${color};font-family:'JetBrains Mono',monospace;">← TOP</span>` : ''}
+      </div>`;
+    }).join('');
+    lucide.createIcons();
+  }
+
+  function renderCurrentPage() {
+    const el = document.getElementById('currentPage');
+    const urlBar = document.getElementById('urlBar');
+    const content = document.getElementById('browserContent');
+    if (!currentPageData) {
+      el.innerHTML = `<span style="color:#475569; font-size:14px;">None</span>`;
+      urlBar.innerHTML = `<i data-lucide="globe" style="width:14px;height:14px;color:#475569;"></i><span style="color:#94a3b8; font-family:'JetBrains Mono',monospace; font-size:13px;">No page visited yet</span>`;
+      content.innerHTML = `<div class="text-center"><i data-lucide="globe" style="width:48px;height:48px;margin:0 auto 12px; color:#1e293b;"></i><p style="font-size:14px;color:#334155;">Visit a page to begin</p></div>`;
+    } else {
+      const pg = getPageData(currentPageData);
+      el.innerHTML = `<div class="flex items-center justify-center gap-2 slide-in"><i data-lucide="${pg.icon}" style="width:20px;height:20px;color:${pg.color};"></i><span style="color:#e2e8f0; font-size:16px; font-weight:600;">${currentPageData}</span></div>`;
+      urlBar.innerHTML = `<i data-lucide="lock" style="width:14px;height:14px;color:#22c55e;"></i><span style="color:#e2e8f0; font-family:'JetBrains Mono',monospace; font-size:13px;">https://${currentPageData}</span>`;
+      content.innerHTML = `<div class="text-center slide-in" style="padding:32px;">
+        <div class="inline-flex p-4 rounded-2xl mb-4" style="background:${pg.color}15; border:1px solid ${pg.color}30;">
+          <i data-lucide="${pg.icon}" style="width:40px;height:40px;color:${pg.color};"></i>
+        </div>
+        <p style="color:#e2e8f0; font-size:20px; font-weight:600;">${currentPageData}</p>
+        <p style="color:#475569; font-size:13px; margin-top:4px;">Currently viewing this page</p>
+      </div>`;
+    }
+    lucide.createIcons();
+  }
+
+  function updateUI() {
+    renderStack('backStack', backStack, '#38bdf8');
+    renderStack('fwdStack', forwardStack, '#a855f7');
+    renderCurrentPage();
+    document.getElementById('backCount').textContent = `${backStack.length} item${backStack.length !== 1 ? 's' : ''}`;
+    document.getElementById('fwdCount').textContent = `${forwardStack.length} item${forwardStack.length !== 1 ? 's' : ''}`;
+    document.getElementById('btnBack').disabled = backStack.length === 0;
+    document.getElementById('btnForward').disabled = forwardStack.length === 0;
+  }
+
+  function visitPage(name) {
+    if (currentPageData) {
+      backStack.push(currentPageData);
+      addLog('PUSH', `"${currentPageData}" → Back Stack`);
+    }
+    if (forwardStack.length > 0) {
+      addLog('CLEAR', `Forward Stack cleared (${forwardStack.length} items)`);
+      forwardStack = [];
+    }
+    currentPageData = name;
+    addLog('VISIT', `Now on "${name}"`);
+    addLog('PEEK', `Current page: "${name}"`);
+    showToast(`Navigated to ${name}`);
+    updateUI();
+  }
+
+  function goBack() {
+    if (backStack.length === 0) return;
+    forwardStack.push(currentPageData);
+    addLog('PUSH', `"${currentPageData}" → Forward Stack`);
+    const prev = backStack.pop();
+    addLog('POP', `"${prev}" ← Back Stack`);
+    currentPageData = prev;
+    addLog('PEEK', `Current page: "${prev}"`);
+    showToast(`Back to ${prev}`);
+    updateUI();
+  }
+
+  function goForward() {
+    if (forwardStack.length === 0) return;
+    backStack.push(currentPageData);
+    addLog('PUSH', `"${currentPageData}" → Back Stack`);
+    const next = forwardStack.pop();
+    addLog('POP', `"${next}" ← Forward Stack`);
+    currentPageData = next;
+    addLog('PEEK', `Current page: "${next}"`);
+    showToast(`Forward to ${next}`);
+    updateUI();
+  }
+
+  function clearLog() {
+    logEntries = [];
+    document.getElementById('opLog').innerHTML = `<div style="color:#334155;">No operations yet...</div>`;
+  }
+
+  // Element SDK
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      const t = config.main_title || defaultConfig.main_title;
+      const s = config.subtitle || defaultConfig.subtitle;
+      document.getElementById('mainTitle').textContent = t;
+      document.getElementById('subtitle').textContent = s;
+      const font = config.font_family || defaultConfig.font_family;
+      const base = config.font_size || defaultConfig.font_size;
+      document.getElementById('mainTitle').style.fontFamily = `${font}, Outfit, sans-serif`;
+      document.getElementById('mainTitle').style.fontSize = `${base * 2}px`;
+      document.getElementById('subtitle').style.fontFamily = `${font}, Outfit, sans-serif`;
+      document.getElementById('subtitle').style.fontSize = `${base * 0.94}px`;
+
+      const bg = config.background_color || defaultConfig.background_color;
+      const surface = config.surface_color || defaultConfig.surface_color;
+      const text = config.text_color || defaultConfig.text_color;
+      const accent = config.accent_color || defaultConfig.accent_color;
+      const secondary = config.secondary_accent || defaultConfig.secondary_accent;
+      document.getElementById('app').style.background = `linear-gradient(160deg, ${bg} 0%, ${surface} 40%, ${bg} 100%)`;
+      document.getElementById('mainTitle').style.color = text;
+    },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+        { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+        { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+        { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+        { get: () => config.secondary_accent || defaultConfig.secondary_accent, set: (v) => { config.secondary_accent = v; window.elementSdk.setConfig({ secondary_accent: v }); } }
+      ],
+      borderables: [],
+      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ["main_title", config.main_title || defaultConfig.main_title],
+      ["subtitle", config.subtitle || defaultConfig.subtitle]
+    ])
+  });
+
+  initPageButtons();
+  updateUI();
+  lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea8de3c83829a87',t:'MTc3NTg5ODczMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
