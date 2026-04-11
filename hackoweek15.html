@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Book</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .card-slide { animation: slideIn 0.3s ease-out; }
+    .fade-in { animation: fadeIn 0.2s ease-out; }
+    .scale-in { animation: scaleIn 0.3s ease-out; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f9fafb; }
+    ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 3px; }
+    body { box-sizing: border-box; }
+  </style>
+ </head>
+ <body class="h-full" style="margin:0; background:#f9fafb; font-family:'Plus Jakarta Sans',sans-serif;">
+  <div id="app" class="h-full w-full overflow-auto flex flex-col" style="background:#f9fafb;"><!-- Header -->
+   <header class="sticky top-0 z-10 bg-white border-b border-gray-200" style="box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+    <div class="max-w-3xl mx-auto px-4 py-5 sm:px-6">
+     <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+       <div class="p-2 rounded-lg" style="background:#3b82f6; color:white;"><i data-lucide="users" style="width:20px;height:20px;"></i>
+       </div>
+       <h1 id="appTitle" class="text-xl sm:text-2xl font-bold" style="color:#111827;">Contact Book</h1>
+      </div><button id="sortBtn" onclick="toggleSort()" class="px-3 py-1.5 rounded-lg transition-all hover:bg-gray-100" style="color:#6b7280; font-size:13px; font-weight:500; border:1px solid #e5e7eb;" title="Sort alphabetically"> <i data-lucide="arrow-up-down" style="width:16px;height:16px;display:inline;margin-right:4px;vertical-align:middle;"></i><span class="hidden sm:inline">Sort</span> </button>
+     </div><!-- Search Bar -->
+     <div class="relative">
+      <div class="absolute left-3 top-1/2 transform -translate-y-1/2"><i data-lucide="search" style="width:18px;height:18px;color:#9ca3af;"></i>
+      </div><input type="text" id="searchInput" placeholder="Search by name..." onkeyup="filterContacts()" class="w-full pl-10 pr-4 py-2.5 rounded-lg border" style="border-color:#e5e7eb; font-size:14px; outline:none; transition:all 0.2s;">
+     </div>
+    </div>
+   </header><!-- Main Content -->
+   <main class="flex-1 overflow-auto">
+    <div class="max-w-3xl mx-auto px-4 py-6 sm:px-6"><!-- Add Contact Section -->
+     <div class="mb-6 bg-white rounded-xl p-4 sm:p-6 border border-gray-200" style="box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+      <h2 class="mb-4 font-semibold text-gray-800" style="font-size:15px;">Add New Contact</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4"><input type="text" id="inputName" placeholder="Full name" class="px-3 py-2.5 rounded-lg border" style="border-color:#e5e7eb; font-size:14px; outline:none; transition:all 0.2s;"> <input type="text" id="inputPhone" placeholder="Phone number" class="px-3 py-2.5 rounded-lg border" style="border-color:#e5e7eb; font-size:14px; outline:none; transition:all 0.2s;"> <input type="text" id="inputEmail" placeholder="Email address" class="px-3 py-2.5 rounded-lg border sm:col-span-2" style="border-color:#e5e7eb; font-size:14px; outline:none; transition:all 0.2s;"> <input type="text" id="inputNote" placeholder="Note (optional)" class="px-3 py-2.5 rounded-lg border sm:col-span-2" style="border-color:#e5e7eb; font-size:14px; outline:none; transition:all 0.2s;">
+      </div><button id="addBtn" onclick="addContact()" class="w-full py-2.5 rounded-lg font-semibold transition-all hover:opacity-90 active:scale-95" style="background:#3b82f6; color:white; font-size:14px; border:none; cursor:pointer;"> <i data-lucide="plus" style="width:16px;height:16px;display:inline;margin-right:6px;vertical-align:middle;"></i>Add Contact </button>
+     </div><!-- Contacts List -->
+     <div id="contactsContainer" class="space-y-3">
+      <div class="text-center py-12"><i data-lucide="inbox" style="width:48px;height:48px;margin:0 auto 12px;color:#d1d5db;"></i>
+       <p id="emptyText" style="color:#9ca3af; font-size:15px;">No contacts yet. Add one to get started!</p>
+      </div>
+     </div><!-- Data Limit Warning -->
+     <div id="limitWarning" class="hidden mt-6 p-4 rounded-lg border" style="background:#fef3c7; border-color:#fcd34d; color:#92400e; font-size:13px;">
+      <div class="flex items-start gap-2"><i data-lucide="alert-triangle" style="width:16px;height:16px;margin-top:2px;flex-shrink:0;"></i> <span>Maximum contact limit (999) reached. Please delete some contacts to add more.</span>
+      </div>
+     </div>
+    </div>
+   </main><!-- Toast Notification -->
+   <div id="toast" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:8px;font-size:13px;z-index:100;opacity:0;transition:opacity 0.3s;pointer-events:none;background:white;border:1px solid #e5e7eb;color:#111827;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+  </div>
+  <script>
+    const defaultConfig = {
+      app_title: "Contact Book",
+      empty_state_text: "No contacts yet. Add one to get started!",
+      primary_color: "#3b82f6",
+      surface_color: "#ffffff",
+      text_color: "#111827",
+      accent_color: "#3b82f6"
+    };
+
+    let contacts = [];
+    let sorted = false;
+    let currentSearchQuery = "";
+
+    const dataHandler = {
+      onDataChanged(data) {
+        contacts = data || [];
+        renderContacts();
+      }
+    };
+
+    async function initDataSDK() {
+      const result = await window.dataSdk.init(dataHandler);
+      if (!result.isOk) {
+        console.error("Failed to initialize data SDK");
+      }
+    }
+
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.opacity = '1';
+      setTimeout(() => t.style.opacity = '0', 2500);
+    }
+
+    function clearInputs() {
+      document.getElementById('inputName').value = '';
+      document.getElementById('inputPhone').value = '';
+      document.getElementById('inputEmail').value = '';
+      document.getElementById('inputNote').value = '';
+    }
+
+    async function addContact() {
+      const name = document.getElementById('inputName').value.trim();
+      const phone = document.getElementById('inputPhone').value.trim();
+      const email = document.getElementById('inputEmail').value.trim();
+      const note = document.getElementById('inputNote').value.trim();
+
+      if (!name) {
+        showToast('Please enter a name');
+        return;
+      }
+
+      if (contacts.length >= 999) {
+        document.getElementById('limitWarning').classList.remove('hidden');
+        showToast('Maximum limit reached');
+        return;
+      }
+
+      const addBtn = document.getElementById('addBtn');
+      addBtn.disabled = true;
+      addBtn.textContent = 'Adding...';
+
+      const contact = {
+        id: generateId(),
+        name,
+        phone,
+        email,
+        note,
+        created_at: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(contact);
+      
+      addBtn.disabled = false;
+      addBtn.innerHTML = '<i data-lucide="plus" style="width:16px;height:16px;display:inline;margin-right:6px;vertical-align:middle;"></i>Add Contact';
+      lucide.createIcons();
+
+      if (result.isOk) {
+        clearInputs();
+        showToast(`Added ${name} ✓`);
+        document.getElementById('searchInput').value = '';
+        currentSearchQuery = '';
+      } else {
+        showToast('Error adding contact');
+      }
+    }
+
+    async function deleteContact(id) {
+      const contact = contacts.find(c => c.__backendId === id);
+      if (!contact) return;
+
+      const result = await window.dataSdk.delete(contact);
+      if (result.isOk) {
+        showToast(`Deleted ${contact.name}`);
+        document.getElementById('limitWarning').classList.add('hidden');
+      } else {
+        showToast('Error deleting contact');
+      }
+    }
+
+    function filterContacts() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      currentSearchQuery = query;
+      renderContacts();
+    }
+
+    function toggleSort() {
+      sorted = !sorted;
+      renderContacts();
+    }
+
+    function getDisplayContacts() {
+      let display = contacts.filter(c => c.name.toLowerCase().includes(currentSearchQuery));
+      if (sorted) {
+        display.sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return display;
+    }
+
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function getAvatarColor(name) {
+      const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return colors[Math.abs(hash) % colors.length];
+    }
+
+    function renderContacts() {
+      const container = document.getElementById('contactsContainer');
+      const display = getDisplayContacts();
+
+      if (display.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12">
+            <i data-lucide="inbox" style="width:48px;height:48px;margin:0 auto 12px;color:#d1d5db;"></i>
+            <p style="color:#9ca3af; font-size:15px;">${currentSearchQuery ? 'No contacts found' : document.getElementById('emptyText').textContent}</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = display.map(contact => {
+        const color = getAvatarColor(contact.name);
+        const initials = getInitials(contact.name);
+        return `
+          <div class="card-slide bg-white rounded-xl p-4 border border-gray-200 transition-all hover:shadow-md" style="box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start gap-3 flex-1 min-w-0">
+                <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold" style="background:${color}; font-size:14px;">
+                  ${initials}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 truncate" style="font-size:15px;">${contact.name}</h3>
+                  ${contact.phone ? `<p class="text-gray-600 text-sm truncate"><i data-lucide="phone" style="width:14px;height:14px;display:inline;margin-right:4px;vertical-align:middle;"></i>${contact.phone}</p>` : ''}
+                  ${contact.email ? `<p class="text-gray-600 text-sm truncate"><i data-lucide="mail" style="width:14px;height:14px;display:inline;margin-right:4px;vertical-align:middle;"></i>${contact.email}</p>` : ''}
+                  ${contact.note ? `<p class="text-gray-500 text-xs mt-1 line-clamp-1">${contact.note}</p>` : ''}
+                </div>
+              </div>
+              <button onclick="deleteContact('${contact.__backendId}')" class="flex-shrink-0 p-2 rounded-lg transition-all hover:bg-red-50 active:scale-95" style="color:#ef4444;">
+                <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => {
+        const title = config.app_title || defaultConfig.app_title;
+        document.getElementById('appTitle').textContent = title;
+        document.getElementById('emptyText').textContent = config.empty_state_text || defaultConfig.empty_state_text;
+      },
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); } }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ["app_title", config.app_title || defaultConfig.app_title],
+        ["empty_state_text", config.empty_state_text || defaultConfig.empty_state_text]
+      ])
+    });
+
+    initDataSDK();
+    lucide.createIcons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea8e65bc6dfaf19',t:'MTc3NTg5OTA2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
