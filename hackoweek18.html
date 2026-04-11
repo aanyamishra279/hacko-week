@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File System Directory Explorer</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['IBM Plex Sans', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace']
+      }
+    }
+  }
+}
+</script>
+  <style>
+html, body { height: 100%; margin: 0; }
+.tree-line { border-left: 2px solid #cbd5e1; margin-left: 11px; }
+.tree-node { position: relative; }
+.tree-node::before { content: ''; position: absolute; left: -16px; top: 12px; width: 14px; height: 0; border-top: 2px solid #cbd5e1; }
+.folder-item:hover { background: #f0f7ff; }
+.folder-item.selected { background: #e0edff; border-left: 3px solid #2563eb; }
+.toast { animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.5s forwards; }
+@keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; } }
+.sidebar-toggle { display: none; }
+@media (max-width: 768px) { .sidebar-toggle { display: flex; } .sidebar-panel { position: fixed; left: -280px; top: 0; z-index: 50; height: 100%; transition: left 0.3s; } .sidebar-panel.open { left: 0; } .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 40; } .sidebar-overlay.open { display: block; } }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gray-50 font-sans text-gray-800 overflow-hidden">
+  <div id="app" class="h-full w-full flex flex-col"><!-- Top Nav -->
+   <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 shrink-0 shadow-sm"><button class="sidebar-toggle items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-100" onclick="toggleSidebar()"> <i data-lucide="menu" class="w-5 h-5 text-gray-600"></i> </button>
+    <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shrink-0"><i data-lucide="folder-tree" class="w-5 h-5 text-white"></i>
+    </div>
+    <h1 id="appTitle" class="text-lg font-semibold text-gray-900 truncate">File System Directory Explorer</h1>
+    <div class="ml-auto flex items-center gap-2"><span class="text-xs text-gray-400 font-mono hidden sm:block" id="folderCount">0 folders</span> <button onclick="refreshDirectory()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition"> <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">Refresh</span> </button>
+    </div>
+   </header>
+   <div class="flex flex-1 overflow-hidden"><!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div><!-- Sidebar -->
+    <aside id="sidebar" class="sidebar-panel w-64 bg-white border-r border-gray-200 flex flex-col shrink-0 overflow-hidden">
+     <div class="p-3 border-b border-gray-100">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2">Navigation</p><button onclick="selectFolder('root')" class="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"> <i data-lucide="hard-drive" class="w-4 h-4 text-blue-500"></i> Root Directory </button>
+     </div>
+     <div class="flex-1 overflow-y-auto p-3">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2">Folders</p>
+      <div id="sidebarList" class="space-y-0.5"></div>
+     </div>
+     <div class="p-3 border-t border-gray-100">
+      <div class="flex items-center gap-2 text-xs text-gray-400 px-2"><i data-lucide="info" class="w-3.5 h-3.5"></i> <span>Click folders to navigate</span>
+      </div>
+     </div>
+    </aside><!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5"><!-- Breadcrumb -->
+     <div id="breadcrumb" class="flex items-center gap-1 text-sm text-gray-500 flex-wrap"><i data-lucide="home" class="w-3.5 h-3.5"></i> <span class="font-medium text-gray-700">Root</span>
+     </div><!-- Add Folder Form -->
+     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 md:p-5">
+      <h2 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="folder-plus" class="w-4 h-4 text-blue-500"></i> Add New Folder</h2>
+      <form id="addForm" class="flex flex-col sm:flex-row gap-3" onsubmit="handleAddFolder(event)">
+       <div class="flex-1"><label for="folderName" class="sr-only">Folder Name</label> <input id="folderName" type="text" placeholder="Folder name" required class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50">
+       </div>
+       <div class="flex-1"><label for="parentSelect" class="sr-only">Parent Folder</label> <select id="parentSelect" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 appearance-none"> <option value="root">/ Root</option> </select>
+       </div>
+       <div class="flex gap-2"><button type="submit" class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-sm"> <i data-lucide="plus" class="w-3.5 h-3.5"></i> Insert </button> <button type="button" onclick="deleteSelected()" id="deleteBtn" class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition disabled:opacity-40" disabled> <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete </button>
+       </div>
+      </form>
+     </div>
+     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5"><!-- Tree View -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+       <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4 text-blue-500"></i>
+        <h2 class="text-sm font-semibold text-gray-800">Directory Tree</h2>
+       </div>
+       <div id="treeView" class="p-4 font-mono text-sm overflow-auto max-h-96 min-h-[120px]"></div>
+      </div><!-- Table View -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+       <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-blue-500"></i>
+        <h2 class="text-sm font-semibold text-gray-800">Folder Details</h2>
+       </div>
+       <div class="overflow-auto max-h-96">
+        <table class="w-full text-sm">
+         <thead class="bg-gray-50 sticky top-0">
+          <tr>
+           <th class="text-left px-4 py-2.5 font-medium text-gray-500 text-xs uppercase tracking-wider">Name</th>
+           <th class="text-left px-4 py-2.5 font-medium text-gray-500 text-xs uppercase tracking-wider">Path</th>
+           <th class="text-left px-4 py-2.5 font-medium text-gray-500 text-xs uppercase tracking-wider">Children</th>
+          </tr>
+         </thead>
+         <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
+        </table>
+        <div id="emptyTable" class="p-8 text-center text-gray-400 text-sm"><i data-lucide="folder-open" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+         <p>No folders yet. Add one above!</p>
+        </div>
+       </div>
+      </div>
+     </div><!-- Inline Delete Confirmation -->
+     <div id="deleteConfirm" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between flex-wrap gap-3">
+      <p class="text-sm text-red-700"><span class="font-semibold">Delete</span> "<span id="deleteTargetName"></span>" and all subfolders?</p>
+      <div class="flex gap-2"><button onclick="confirmDelete()" class="px-4 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition">Yes, Delete</button> <button onclick="cancelDelete()" class="px-4 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+      </div>
+     </div>
+    </main>
+   </div>
+  </div><!-- Toast -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+  <script>
+// --- State ---
+let folders = [
+  { id: 'root', name: 'Root', parent: null },
+  { id: 'docs', name: 'Documents', parent: 'root' },
+  { id: 'pics', name: 'Pictures', parent: 'root' },
+  { id: 'work', name: 'Work', parent: 'docs' },
+  { id: 'personal', name: 'Personal', parent: 'docs' },
+  { id: 'vacation', name: 'Vacation', parent: 'pics' },
+];
+let selectedId = null;
+let pendingDeleteId = null;
+let idCounter = 1;
+
+const defaultConfig = {
+  app_title: 'File System Directory Explorer',
+  background_color: '#f9fafb',
+  surface_color: '#ffffff',
+  text_color: '#111827',
+  primary_action_color: '#2563eb',
+  secondary_action_color: '#6b7280'
+};
+
+function getChildren(parentId) {
+  return folders.filter(f => f.parent === parentId);
+}
+
+function getPath(id) {
+  const parts = [];
+  let current = folders.find(f => f.id === id);
+  while (current && current.id !== 'root') {
+    parts.unshift(current.name);
+    current = folders.find(f => f.id === current.parent);
+  }
+  return '/' + parts.join('/');
+}
+
+function getAllDescendants(id) {
+  const result = [id];
+  const children = getChildren(id);
+  children.forEach(c => result.push(...getAllDescendants(c.id)));
+  return result;
+}
+
+// --- Rendering ---
+function render() {
+  renderSidebar();
+  renderTree();
+  renderTable();
+  renderParentSelect();
+  renderBreadcrumb();
+  document.getElementById('folderCount').textContent = (folders.length - 1) + ' folders';
+  document.getElementById('deleteBtn').disabled = !selectedId || selectedId === 'root';
+  lucide.createIcons();
+}
+
+function renderSidebar() {
+  const list = document.getElementById('sidebarList');
+  const topLevel = getChildren('root');
+  list.innerHTML = topLevel.map(f => renderSidebarItem(f, 0)).join('');
+}
+
+function renderSidebarItem(folder, depth) {
+  const children = getChildren(folder.id);
+  const isSelected = folder.id === selectedId;
+  const pl = depth * 16 + 8;
+  let html = `<div class="folder-item flex items-center gap-2 py-1.5 rounded-lg cursor-pointer text-sm transition ${isSelected ? 'selected' : ''}" style="padding-left:${pl}px;padding-right:8px" onclick="selectFolder('${folder.id}')">
+    <i data-lucide="${children.length ? 'folder' : 'folder'}" class="w-4 h-4 ${isSelected ? 'text-blue-600' : 'text-yellow-500'} shrink-0"></i>
+    <span class="truncate ${isSelected ? 'text-blue-700 font-medium' : 'text-gray-700'}">${escHtml(folder.name)}</span>
+    ${children.length ? `<span class="ml-auto text-xs text-gray-400">${children.length}</span>` : ''}
+  </div>`;
+  if (children.length) {
+    html += children.map(c => renderSidebarItem(c, depth + 1)).join('');
+  }
+  return html;
+}
+
+function renderTree() {
+  const container = document.getElementById('treeView');
+  const root = folders.find(f => f.id === 'root');
+  container.innerHTML = renderTreeNode(root, true);
+}
+
+function renderTreeNode(folder, isRoot) {
+  const children = getChildren(folder.id);
+  const isSelected = folder.id === selectedId;
+  const icon = isRoot ? '💻' : (children.length ? '📁' : '📂');
+  let html = `<div class="flex items-center gap-1.5 py-0.5 cursor-pointer rounded px-1 ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'hover:bg-gray-50'}" onclick="selectFolder('${folder.id}')">
+    <span>${icon}</span><span>${escHtml(folder.name)}</span>
+  </div>`;
+  if (children.length) {
+    html += `<div class="tree-line pl-4 ml-0">${children.map((c, i) => `<div class="tree-node ml-3">${renderTreeNode(c, false)}</div>`).join('')}</div>`;
+  }
+  return html;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyTable');
+  const items = folders.filter(f => f.id !== 'root');
+  if (!items.length) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  tbody.innerHTML = items.map(f => {
+    const children = getChildren(f.id);
+    const isSelected = f.id === selectedId;
+    return `<tr class="cursor-pointer ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'} transition" onclick="selectFolder('${f.id}')">
+      <td class="px-4 py-2.5 flex items-center gap-2"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i><span class="${isSelected ? 'font-medium text-blue-700' : ''}">${escHtml(f.name)}</span></td>
+      <td class="px-4 py-2.5 text-gray-500 font-mono text-xs">${escHtml(getPath(f.id))}</td>
+      <td class="px-4 py-2.5 text-gray-500">${children.length}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderParentSelect() {
+  const sel = document.getElementById('parentSelect');
+  const val = sel.value;
+  sel.innerHTML = flattenOptions('root', 0);
+  if (folders.find(f => f.id === val)) sel.value = val;
+}
+
+function flattenOptions(id, depth) {
+  const f = folders.find(x => x.id === id);
+  if (!f) return '';
+  const prefix = '—'.repeat(depth);
+  let html = `<option value="${f.id}">${prefix ? prefix + ' ' : '/ '}${escHtml(f.name)}</option>`;
+  getChildren(id).forEach(c => html += flattenOptions(c.id, depth + 1));
+  return html;
+}
+
+function renderBreadcrumb() {
+  const el = document.getElementById('breadcrumb');
+  if (!selectedId || selectedId === 'root') {
+    el.innerHTML = '<i data-lucide="home" class="w-3.5 h-3.5"></i><span class="font-medium text-gray-700">Root</span>';
+    return;
+  }
+  const parts = [];
+  let cur = folders.find(f => f.id === selectedId);
+  while (cur) {
+    parts.unshift(cur);
+    cur = folders.find(f => f.id === cur.parent);
+  }
+  el.innerHTML = parts.map((p, i) => {
+    const isLast = i === parts.length - 1;
+    return `${i > 0 ? '<i data-lucide="chevron-right" class="w-3 h-3 text-gray-300"></i>' : '<i data-lucide="home" class="w-3.5 h-3.5"></i>'}
+      <span class="${isLast ? 'font-medium text-gray-700' : 'text-gray-400 cursor-pointer hover:text-gray-600'}" ${!isLast ? `onclick="selectFolder('${p.id}')"` : ''}>${escHtml(p.id === 'root' ? 'Root' : p.name)}</span>`;
+  }).join('');
+}
+
+// --- Actions ---
+function selectFolder(id) {
+  selectedId = id;
+  cancelDelete();
+  render();
+}
+
+function handleAddFolder(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('folderName');
+  const name = nameInput.value.trim();
+  if (!name) return;
+  const parent = document.getElementById('parentSelect').value;
+  const id = 'folder_' + Date.now() + '_' + (idCounter++);
+  folders.push({ id, name, parent });
+  nameInput.value = '';
+  showToast(`"${name}" created`, 'success');
+  render();
+}
+
+function deleteSelected() {
+  if (!selectedId || selectedId === 'root') return;
+  pendingDeleteId = selectedId;
+  const f = folders.find(x => x.id === selectedId);
+  document.getElementById('deleteTargetName').textContent = f.name;
+  document.getElementById('deleteConfirm').classList.remove('hidden');
+}
+
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const desc = getAllDescendants(pendingDeleteId);
+  const f = folders.find(x => x.id === pendingDeleteId);
+  folders = folders.filter(x => !desc.includes(x.id));
+  showToast(`"${f.name}" deleted (${desc.length} item${desc.length > 1 ? 's' : ''})`, 'error');
+  selectedId = null;
+  pendingDeleteId = null;
+  document.getElementById('deleteConfirm').classList.add('hidden');
+  render();
+}
+
+function cancelDelete() {
+  pendingDeleteId = null;
+  document.getElementById('deleteConfirm').classList.add('hidden');
+}
+
+function refreshDirectory() {
+  showToast('Directory refreshed', 'info');
+  render();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+function showToast(msg, type) {
+  const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${colors[type] || colors.info} text-white text-sm px-4 py-2 rounded-lg shadow-lg`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// --- Element SDK ---
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const c = key => config[key] || defaultConfig[key];
+    document.getElementById('appTitle').textContent = c('app_title');
+    document.body.style.backgroundColor = c('background_color');
+    document.querySelectorAll('.bg-white, table thead').forEach(el => {
+      if (el.classList.contains('bg-white')) el.style.backgroundColor = c('surface_color');
+    });
+    document.body.style.color = c('text_color');
+    document.querySelectorAll('button.bg-blue-600, .w-9.h-9.rounded-lg.bg-blue-600').forEach(el => {
+      el.style.backgroundColor = c('primary_action_color');
+    });
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: v => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: v => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+      { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: v => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } },
+    ],
+    borderables: [],
+    fontEditable: {
+      get: () => config.font_family || 'IBM Plex Sans',
+      set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+    },
+    fontSizeable: {
+      get: () => config.font_size || 14,
+      set: v => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+    }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['app_title', config.app_title || defaultConfig.app_title]
+  ])
+});
+
+// Initial render
+render();
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea9377e60c24932',t:'MTc3NTkwMjM4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
