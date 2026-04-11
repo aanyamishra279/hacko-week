@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Score Tracker</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:wght@600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+  * { box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; }
+  .font-display { font-family: 'Fraunces', serif; }
+  .fade-in { animation: fadeIn 0.5s ease both; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .bar-grow { animation: barGrow 0.6s ease both; }
+  @keyframes barGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+  .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+  .toast { animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+  .confirm-slide { animation: confirmSlide 0.2s ease; }
+  @keyframes confirmSlide { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+  input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
+  .hero-pattern {
+    background-image: radial-gradient(circle at 20% 50%, rgba(37,99,235,0.06) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, rgba(16,185,129,0.06) 0%, transparent 50%),
+                      radial-gradient(circle at 60% 80%, rgba(245,158,11,0.05) 0%, transparent 50%);
+  }
+  .chart-illustration {
+    background: linear-gradient(135deg, #dbeafe 0%, #d1fae5 100%);
+  }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto hero-pattern" style="background-color:#f8fafc;"><!-- Toast container -->
+   <div id="toast-container" class="fixed top-4 right-4 z-50"></div><!-- Hero Section -->
+   <header class="w-full px-4 pt-10 pb-8 md:pt-16 md:pb-12">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8">
+     <div class="flex-1 text-center md:text-left">
+      <h1 id="main-title" class="font-display text-4xl md:text-5xl font-800 leading-tight" style="color:#1e293b;">Exam Score Tracker</h1>
+      <p id="tagline" class="mt-3 text-lg md:text-xl" style="color:#64748b;">Track and analyze exam performance easily</p>
+      <div class="mt-6 flex items-center gap-2 justify-center md:justify-start"><span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium" style="background:#dbeafe;color:#2563eb;"><i data-lucide="bar-chart-3" style="width:14px;height:14px;"></i> Analytics</span> <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium" style="background:#d1fae5;color:#059669;"><i data-lucide="users" style="width:14px;height:14px;"></i> Students</span> <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium" style="background:#fef3c7;color:#d97706;"><i data-lucide="trophy" style="width:14px;height:14px;"></i> Scores</span>
+      </div>
+     </div><!-- Chart illustration -->
+     <div class="chart-illustration rounded-2xl p-6 w-64 h-44 flex items-end gap-2 justify-center shadow-sm">
+      <div class="w-8 rounded-t-md" style="height:40%;background:#2563eb;opacity:0.7;"></div>
+      <div class="w-8 rounded-t-md" style="height:70%;background:#059669;opacity:0.7;"></div>
+      <div class="w-8 rounded-t-md" style="height:55%;background:#2563eb;opacity:0.7;"></div>
+      <div class="w-8 rounded-t-md" style="height:90%;background:#059669;opacity:0.7;"></div>
+      <div class="w-8 rounded-t-md" style="height:45%;background:#2563eb;opacity:0.7;"></div>
+      <div class="w-8 rounded-t-md" style="height:65%;background:#059669;opacity:0.7;"></div>
+     </div>
+    </div>
+   </header><!-- Statistics Cards -->
+   <section class="w-full px-4 pb-6">
+    <div class="max-w-6xl mx-auto">
+     <div id="stats-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="stat-card rounded-xl p-5 shadow-sm border" style="background:#fff;border-color:#e2e8f0;">
+       <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="arrow-down-circle" style="width:20px;height:20px;color:#2563eb;"></i><span class="text-xs font-semibold uppercase tracking-wider" style="color:#94a3b8;">Min Score</span>
+       </div>
+       <p id="stat-min" class="font-display text-3xl font-700" style="color:#1e293b;">—</p>
+      </div>
+      <div class="stat-card rounded-xl p-5 shadow-sm border" style="background:#fff;border-color:#e2e8f0;">
+       <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="arrow-up-circle" style="width:20px;height:20px;color:#059669;"></i><span class="text-xs font-semibold uppercase tracking-wider" style="color:#94a3b8;">Max Score</span>
+       </div>
+       <p id="stat-max" class="font-display text-3xl font-700" style="color:#1e293b;">—</p>
+      </div>
+      <div class="stat-card rounded-xl p-5 shadow-sm border" style="background:#fff;border-color:#e2e8f0;">
+       <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="repeat" style="width:20px;height:20px;color:#d97706;"></i><span class="text-xs font-semibold uppercase tracking-wider" style="color:#94a3b8;">Mode</span>
+       </div>
+       <p id="stat-mode" class="font-display text-3xl font-700" style="color:#1e293b;">—</p>
+      </div>
+      <div class="stat-card rounded-xl p-5 shadow-sm border" style="background:#fff;border-color:#e2e8f0;">
+       <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="calculator" style="width:20px;height:20px;color:#8b5cf6;"></i><span class="text-xs font-semibold uppercase tracking-wider" style="color:#94a3b8;">Average</span>
+       </div>
+       <p id="stat-avg" class="font-display text-3xl font-700" style="color:#1e293b;">—</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- Add Score Form + Scores Table -->
+   <section class="w-full px-4 pb-6">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6"><!-- Add Score Form -->
+     <div class="lg:col-span-1">
+      <div class="rounded-xl p-6 shadow-sm border" style="background:#fff;border-color:#e2e8f0;">
+       <h2 class="font-display text-xl font-700 mb-4 flex items-center gap-2" style="color:#1e293b;"><i data-lucide="plus-circle" style="width:22px;height:22px;color:#2563eb;"></i> Add Score</h2>
+       <form id="score-form" class="space-y-4">
+        <div><label for="student-name" class="block text-sm font-medium mb-1" style="color:#475569;">Student Name</label> <input type="text" id="student-name" required placeholder="e.g. Jane Doe" class="w-full px-3 py-2.5 rounded-lg border text-sm" style="border-color:#cbd5e1;color:#1e293b;">
+        </div>
+        <div><label for="subject" class="block text-sm font-medium mb-1" style="color:#475569;">Subject</label> <input type="text" id="subject" required placeholder="e.g. Mathematics" class="w-full px-3 py-2.5 rounded-lg border text-sm" style="border-color:#cbd5e1;color:#1e293b;">
+        </div>
+        <div><label for="exam-score" class="block text-sm font-medium mb-1" style="color:#475569;">Exam Score</label> <input type="number" id="exam-score" required min="0" max="100" placeholder="0 – 100" class="w-full px-3 py-2.5 rounded-lg border text-sm" style="border-color:#cbd5e1;color:#1e293b;">
+        </div><button id="add-btn" type="submit" class="w-full py-2.5 rounded-lg text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors" style="background:#2563eb;"> <i data-lucide="plus" style="width:16px;height:16px;"></i> <span id="add-btn-text">Add Score</span> </button>
+       </form><!-- Edit mode cancel --> <button id="cancel-edit-btn" class="hidden w-full mt-2 py-2 rounded-lg text-sm font-medium border transition-colors" style="border-color:#cbd5e1;color:#64748b;" onclick="cancelEdit()">Cancel Edit</button>
+      </div>
+     </div><!-- Scores Table -->
+     <div class="lg:col-span-2">
+      <div class="rounded-xl shadow-sm border overflow-hidden" style="background:#fff;border-color:#e2e8f0;">
+       <div class="p-5 border-b flex items-center justify-between" style="border-color:#e2e8f0;">
+        <h2 class="font-display text-xl font-700 flex items-center gap-2" style="color:#1e293b;"><i data-lucide="list" style="width:22px;height:22px;color:#059669;"></i> Scores List</h2><span id="score-count" class="text-xs font-medium px-2 py-1 rounded-full" style="background:#f1f5f9;color:#64748b;">0 records</span>
+       </div>
+       <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+         <thead>
+          <tr style="background:#f8fafc;">
+           <th class="text-left px-5 py-3 font-semibold" style="color:#64748b;">Student</th>
+           <th class="text-left px-5 py-3 font-semibold" style="color:#64748b;">Subject</th>
+           <th class="text-left px-5 py-3 font-semibold" style="color:#64748b;">Score</th>
+           <th class="text-right px-5 py-3 font-semibold" style="color:#64748b;">Actions</th>
+          </tr>
+         </thead>
+         <tbody id="scores-tbody"></tbody>
+        </table>
+        <div id="empty-state" class="p-10 text-center" style="color:#94a3b8;"><i data-lucide="inbox" style="width:40px;height:40px;margin:0 auto 8px;"></i>
+         <p class="text-sm">No scores yet. Add your first score above!</p>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Charts Section -->
+   <section class="w-full px-4 pb-10">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Bar Chart -->
+     <div class="rounded-xl p-6 shadow-sm border" style="background:#fff;border-color:#e2e8f0;">
+      <h2 class="font-display text-xl font-700 mb-4 flex items-center gap-2" style="color:#1e293b;"><i data-lucide="bar-chart-3" style="width:22px;height:22px;color:#2563eb;"></i> Score Frequency</h2>
+      <div id="bar-chart" class="flex items-end gap-1 h-48 border-b border-l p-2" style="border-color:#e2e8f0;">
+       <p class="text-xs m-auto" style="color:#94a3b8;">Add scores to see the chart</p>
+      </div>
+      <div class="flex justify-between mt-1 text-xs" style="color:#94a3b8;"><span>Score →</span><span>Frequency ↑</span>
+      </div>
+     </div><!-- Distribution Panel -->
+     <div class="rounded-xl p-6 shadow-sm border" style="background:#fff;border-color:#e2e8f0;">
+      <h2 class="font-display text-xl font-700 mb-4 flex items-center gap-2" style="color:#1e293b;"><i data-lucide="pie-chart" style="width:22px;height:22px;color:#059669;"></i> Score Distribution</h2>
+      <div id="distribution-panel" class="space-y-2 max-h-48 overflow-y-auto">
+       <p class="text-xs" style="color:#94a3b8;">Add scores to see distribution</p>
+      </div>
+     </div>
+    </div>
+   </section>
+  </div>
+  <script>
+// State
+let allScores = [];
+let editingRecord = null;
+
+const defaultConfig = {
+  main_title: 'Exam Score Tracker',
+  tagline: 'Track and analyze exam performance easily',
+  add_button_text: 'Add Score',
+  background_color: '#f8fafc',
+  surface_color: '#ffffff',
+  text_color: '#1e293b',
+  primary_action_color: '#2563eb',
+  secondary_action_color: '#059669',
+  font_family: 'DM Sans',
+  font_size: 14
+};
+
+// Toast helper
+function showToast(msg, type='success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  const bg = type === 'success' ? '#059669' : type === 'error' ? '#dc2626' : '#2563eb';
+  t.className = 'toast px-4 py-2.5 rounded-lg text-white text-sm font-medium shadow-lg mb-2';
+  t.style.background = bg;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2600);
+}
+
+// Compute stats
+function computeStats(data) {
+  if (!data.length) return { min:'—', max:'—', mode:'—', avg:'—' };
+  const scores = data.map(d => d.score);
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
+  const avg = (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
+  const freq = {};
+  scores.forEach(s => freq[s] = (freq[s]||0)+1);
+  const maxFreq = Math.max(...Object.values(freq));
+  const mode = Object.keys(freq).filter(k => freq[k]===maxFreq).join(', ');
+  return { min, max, mode, avg };
+}
+
+// Render scores table with selective updates
+function renderTable(data) {
+  const tbody = document.getElementById('scores-tbody');
+  const empty = document.getElementById('empty-state');
+  const countEl = document.getElementById('score-count');
+  countEl.textContent = `${data.length} record${data.length!==1?'s':''}`;
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const existing = new Map([...tbody.children].map(el => [el.dataset.id, el]));
+  const fragment = document.createDocumentFragment();
+
+  data.forEach(item => {
+    const id = item.__backendId;
+    let row = existing.get(id);
+    if (row) {
+      // Update in place
+      row.children[0].textContent = item.student_name;
+      row.children[1].textContent = item.subject;
+      row.children[2].querySelector('span').textContent = item.score;
+      existing.delete(id);
+    } else {
+      row = document.createElement('tr');
+      row.dataset.id = id;
+      row.className = 'border-t fade-in';
+      row.style.borderColor = '#f1f5f9';
+      const scoreBg = item.score >= 80 ? '#d1fae5' : item.score >= 50 ? '#fef3c7' : '#fee2e2';
+      const scoreColor = item.score >= 80 ? '#059669' : item.score >= 50 ? '#d97706' : '#dc2626';
+      row.innerHTML = `
+        <td class="px-5 py-3 font-medium" style="color:#1e293b;">${esc(item.student_name)}</td>
+        <td class="px-5 py-3" style="color:#64748b;">${esc(item.subject)}</td>
+        <td class="px-5 py-3"><span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold" style="background:${scoreBg};color:${scoreColor};">${item.score}</span></td>
+        <td class="px-5 py-3 text-right">
+          <div class="actions-default inline-flex gap-1">
+            <button onclick="startEdit('${id}')" class="p-1.5 rounded-md transition-colors" style="color:#2563eb;" title="Edit"><i data-lucide="edit-2" style="width:15px;height:15px;"></i></button>
+            <button onclick="confirmDelete('${id}')" class="p-1.5 rounded-md transition-colors" style="color:#dc2626;" title="Delete"><i data-lucide="trash-2" style="width:15px;height:15px;"></i></button>
+          </div>
+          <div class="actions-confirm hidden confirm-slide inline-flex gap-1 items-center">
+            <span class="text-xs mr-1" style="color:#dc2626;">Delete?</span>
+            <button onclick="doDelete('${id}')" class="px-2 py-1 rounded text-xs font-medium text-white" style="background:#dc2626;">Yes</button>
+            <button onclick="cancelDelete('${id}')" class="px-2 py-1 rounded text-xs font-medium border" style="border-color:#cbd5e1;color:#64748b;">No</button>
+          </div>
+        </td>`;
+      fragment.appendChild(row);
+    }
+  });
+
+  existing.forEach(el => el.remove());
+  tbody.appendChild(fragment);
+  lucide.createIcons();
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// Stats
+function renderStats(data) {
+  const s = computeStats(data);
+  document.getElementById('stat-min').textContent = s.min;
+  document.getElementById('stat-max').textContent = s.max;
+  document.getElementById('stat-mode').textContent = s.mode;
+  document.getElementById('stat-avg').textContent = s.avg;
+}
+
+// Bar chart
+function renderBarChart(data) {
+  const container = document.getElementById('bar-chart');
+  if (!data.length) { container.innerHTML = '<p class="text-xs m-auto" style="color:#94a3b8;">Add scores to see the chart</p>'; return; }
+  const freq = {};
+  data.forEach(d => freq[d.score] = (freq[d.score]||0)+1);
+  const keys = Object.keys(freq).sort((a,b)=>a-b);
+  const maxF = Math.max(...Object.values(freq));
+  const colors = ['#2563eb','#059669','#d97706','#8b5cf6','#ec4899'];
+  container.innerHTML = keys.map((k,i) =>
+    `<div class="flex flex-col items-center flex-1 min-w-0" style="height:100%;">
+      <div class="flex-1 w-full flex items-end justify-center">
+        <div class="bar-grow w-full max-w-[28px] rounded-t-md" style="height:${(freq[k]/maxF)*100}%;background:${colors[i%colors.length]};transform-origin:bottom;animation-delay:${i*80}ms;"></div>
+      </div>
+      <span class="text-xs mt-1 font-medium truncate w-full text-center" style="color:#64748b;">${k}</span>
+      <span class="text-xs" style="color:#94a3b8;">×${freq[k]}</span>
+    </div>`
+  ).join('');
+}
+
+// Distribution panel
+function renderDistribution(data) {
+  const panel = document.getElementById('distribution-panel');
+  if (!data.length) { panel.innerHTML = '<p class="text-xs" style="color:#94a3b8;">Add scores to see distribution</p>'; return; }
+  const freq = {};
+  data.forEach(d => freq[d.score] = (freq[d.score]||0)+1);
+  const total = data.length;
+  const sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  panel.innerHTML = sorted.map(([score, count]) => {
+    const pct = ((count/total)*100).toFixed(0);
+    const bg = score >= 80 ? '#2563eb' : score >= 50 ? '#059669' : '#d97706';
+    return `<div class="flex items-center gap-3">
+      <span class="text-sm font-bold w-8 text-right" style="color:#1e293b;">${score}</span>
+      <div class="flex-1 h-5 rounded-full overflow-hidden" style="background:#f1f5f9;">
+        <div class="h-full rounded-full transition-all" style="width:${pct}%;background:${bg};min-width:4px;"></div>
+      </div>
+      <span class="text-xs font-medium w-16 text-right" style="color:#64748b;">${count} (${pct}%)</span>
+    </div>`;
+  }).join('');
+}
+
+// Edit / Delete actions
+function startEdit(id) {
+  const record = allScores.find(r => r.__backendId === id);
+  if (!record) return;
+  editingRecord = record;
+  document.getElementById('student-name').value = record.student_name;
+  document.getElementById('subject').value = record.subject;
+  document.getElementById('exam-score').value = record.score;
+  document.getElementById('add-btn-text').textContent = 'Update Score';
+  document.getElementById('add-btn').style.background = '#059669';
+  document.getElementById('cancel-edit-btn').classList.remove('hidden');
+  document.getElementById('score-form').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function cancelEdit() {
+  editingRecord = null;
+  document.getElementById('score-form').reset();
+  const cfg = window.elementSdk?.config || defaultConfig;
+  document.getElementById('add-btn-text').textContent = cfg.add_button_text || defaultConfig.add_button_text;
+  document.getElementById('add-btn').style.background = cfg.primary_action_color || defaultConfig.primary_action_color;
+  document.getElementById('cancel-edit-btn').classList.add('hidden');
+}
+
+function confirmDelete(id) {
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (!row) return;
+  row.querySelector('.actions-default').classList.add('hidden');
+  row.querySelector('.actions-confirm').classList.remove('hidden');
+}
+
+function cancelDelete(id) {
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (!row) return;
+  row.querySelector('.actions-default').classList.remove('hidden');
+  row.querySelector('.actions-confirm').classList.add('hidden');
+}
+
+async function doDelete(id) {
+  const record = allScores.find(r => r.__backendId === id);
+  if (!record) return;
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (row) row.style.opacity = '0.5';
+  const result = await window.dataSdk.delete(record);
+  if (result.isOk) {
+    showToast('Score deleted');
+    if (editingRecord && editingRecord.__backendId === id) cancelEdit();
+  } else {
+    showToast('Failed to delete', 'error');
+    if (row) row.style.opacity = '1';
+  }
+}
+
+// Form submit
+document.getElementById('score-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('add-btn');
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+
+  const name = document.getElementById('student-name').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const score = parseInt(document.getElementById('exam-score').value);
+
+  if (editingRecord) {
+    const updated = { ...editingRecord, student_name: name, subject, score };
+    const result = await window.dataSdk.update(updated);
+    if (result.isOk) { showToast('Score updated'); cancelEdit(); }
+    else showToast('Failed to update', 'error');
+  } else {
+    if (allScores.length >= 999) { showToast('Limit of 999 records reached. Delete some first.', 'error'); btn.disabled=false; btn.style.opacity='1'; return; }
+    const result = await window.dataSdk.create({ student_name: name, subject, score, created_at: new Date().toISOString() });
+    if (result.isOk) { showToast('Score added!'); document.getElementById('score-form').reset(); }
+    else showToast('Failed to add', 'error');
+  }
+  btn.disabled = false;
+  btn.style.opacity = '1';
+});
+
+// Data handler
+const dataHandler = {
+  onDataChanged(data) {
+    allScores = data;
+    renderTable(data);
+    renderStats(data);
+    renderBarChart(data);
+    renderDistribution(data);
+  }
+};
+
+// Element SDK
+function applyConfig(config) {
+  const c = key => config[key] || defaultConfig[key];
+  document.getElementById('main-title').textContent = c('main_title');
+  document.getElementById('tagline').textContent = c('tagline');
+  if (!editingRecord) document.getElementById('add-btn-text').textContent = c('add_button_text');
+  document.getElementById('app').style.backgroundColor = c('background_color');
+  document.getElementById('add-btn').style.background = editingRecord ? c('secondary_action_color') : c('primary_action_color');
+  const font = c('font_family');
+  document.body.style.fontFamily = `${font}, DM Sans, sans-serif`;
+  const size = c('font_size');
+  document.body.style.fontSize = `${size}px`;
+}
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => applyConfig(config),
+  mapToCapabilities: (config) => {
+    const c = key => config[key] || defaultConfig[key];
+    const mut = (key) => ({
+      get: () => c(key),
+      set: (v) => { config[key] = v; window.elementSdk.setConfig({ [key]: v }); }
+    });
+    return {
+      recolorables: [mut('background_color'), mut('surface_color'), mut('text_color'), mut('primary_action_color'), mut('secondary_action_color')],
+      borderables: [],
+      fontEditable: mut('font_family'),
+      fontSizeable: mut('font_size')
+    };
+  },
+  mapToEditPanelValues: (config) => new Map([
+    ['main_title', config.main_title || defaultConfig.main_title],
+    ['tagline', config.tagline || defaultConfig.tagline],
+    ['add_button_text', config.add_button_text || defaultConfig.add_button_text]
+  ])
+});
+
+// Init Data SDK
+(async () => {
+  const result = await window.dataSdk.init(dataHandler);
+  if (!result.isOk) console.error('Data SDK init failed');
+})();
+
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea920e420ba3fea',t:'MTc3NTkwMTQ2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
