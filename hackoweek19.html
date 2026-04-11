@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linked Beats</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <style>
+html, body { height: 100%; margin: 0; }
+* { box-sizing: border-box; }
+body { font-family: 'Outfit', sans-serif; }
+
+.node-card { transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+.node-card.active { transform: scale(1.05); }
+.node-card.removing { opacity: 0; transform: scale(0.8) translateY(20px); }
+.node-card.adding { animation: nodeIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+@keyframes nodeIn {
+  from { opacity: 0; transform: scale(0.7) translateY(30px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+.pointer-pulse { animation: pulse 2s ease-in-out infinite; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide-up { animation: slideUp 0.3s ease forwards; }
+
+.cover-art {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.cover-art::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.pointer-line {
+  position: absolute;
+  height: 2px;
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.toast-msg {
+  animation: slideUp 0.3s ease forwards;
+  pointer-events: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.btn-glow:hover { box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.3); }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-auto" style="background: #0a0a0f;">
+  <div id="app" class="h-full w-full flex flex-col" style="background: linear-gradient(165deg, #0a0a0f 0%, #12121f 40%, #0f0a1a 100%);"><!-- Header -->
+   <header class="flex-shrink-0 px-6 pt-6 pb-4">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+     <div>
+      <div class="flex items-center gap-3 mb-1">
+       <div class="w-8 h-8 rounded-lg flex items-center justify-center" id="logo-box" style="background: #e24a6a;"><i data-lucide="list-music" style="width:18px;height:18px;color:#fff;"></i>
+       </div>
+       <h1 id="playlist-title" class="text-2xl font-bold" style="color: #f0e6f6;">My Playlist</h1>
+      </div>
+      <p class="text-sm font-light tracking-wide" style="color: #6b6580;">Doubly Linked List Visualizer</p>
+     </div>
+     <div class="flex items-center gap-2"><span id="song-count" class="text-xs font-mono px-3 py-1 rounded-full" style="background: rgba(226,74,106,0.15); color: #e24a6a;">0 nodes</span>
+     </div>
+    </div>
+   </header><!-- Controls -->
+   <div class="flex-shrink-0 px-6 pb-4">
+    <div class="max-w-5xl mx-auto">
+     <div class="flex flex-wrap gap-2 items-center"><button onclick="showAddModal('start')" class="btn-glow flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all" style="background: rgba(226,74,106,0.15); color: #e24a6a; --accent-rgb: 226,74,106;"> <i data-lucide="arrow-up-left" style="width:14px;height:14px;"></i> Add Start </button> <button onclick="showAddModal('end')" class="btn-glow flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all" style="background: rgba(226,74,106,0.15); color: #e24a6a; --accent-rgb: 226,74,106;"> <i data-lucide="arrow-down-right" style="width:14px;height:14px;"></i> Add End </button> <button onclick="shufflePlaylist()" class="btn-glow flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all" style="background: rgba(168,85,247,0.15); color: #a855f7; --accent-rgb: 168,85,247;"> <i data-lucide="shuffle" style="width:14px;height:14px;"></i> Shuffle </button>
+      <div class="flex items-center gap-1 ml-auto"><button onclick="navigatePrev()" id="btn-prev" class="p-2 rounded-lg transition-all" style="background: rgba(255,255,255,0.05); color: #6b6580;"> <i data-lucide="skip-back" style="width:18px;height:18px;"></i> </button> <button onclick="togglePlay()" id="btn-play" class="p-3 rounded-full transition-all" style="background: #e24a6a; color: #fff;"> <i data-lucide="play" style="width:20px;height:20px;" id="play-icon"></i> </button> <button onclick="navigateNext()" id="btn-next" class="p-2 rounded-lg transition-all" style="background: rgba(255,255,255,0.05); color: #6b6580;"> <i data-lucide="skip-forward" style="width:18px;height:18px;"></i> </button>
+      </div>
+     </div>
+    </div>
+   </div><!-- Now Playing -->
+   <div id="now-playing" class="flex-shrink-0 px-6 pb-4 hidden">
+    <div class="max-w-5xl mx-auto">
+     <div class="rounded-xl p-4 flex items-center gap-4" style="background: linear-gradient(135deg, rgba(226,74,106,0.1), rgba(168,85,247,0.08)); border: 1px solid rgba(226,74,106,0.15);">
+      <div id="np-cover" class="w-14 h-14 rounded-lg flex-shrink-0 flex items-center justify-center text-2xl"></div>
+      <div class="flex-1 min-w-0">
+       <p id="np-title" class="font-semibold truncate" style="color: #f0e6f6;"></p>
+       <p id="np-artist" class="text-sm truncate" style="color: #6b6580;"></p>
+      </div>
+      <div class="flex items-center gap-3 text-xs font-mono" style="color: #6b6580;"><span id="np-prev-ptr" class="px-2 py-1 rounded" style="background: rgba(168,85,247,0.15); color: #a855f7;">prev: null</span> <span id="np-next-ptr" class="px-2 py-1 rounded" style="background: rgba(226,74,106,0.15); color: #e24a6a;">next: null</span>
+      </div>
+     </div>
+    </div>
+   </div><!-- Linked List Visualization -->
+   <div class="flex-1 overflow-auto scrollbar-hide px-6 pb-6">
+    <div class="max-w-5xl mx-auto">
+     <div class="flex items-center gap-1 mb-3"><span class="text-xs font-mono" style="color: #6b6580;">HEAD</span>
+      <div class="flex-1 h-px" style="background: rgba(107,101,128,0.3);"></div><span class="text-xs font-mono" style="color: #6b6580;">TAIL</span>
+     </div>
+     <div id="list-container" class="flex flex-wrap gap-4 items-start">
+      <div id="empty-state" class="w-full flex flex-col items-center justify-center py-16 text-center">
+       <div class="w-20 h-20 rounded-2xl flex items-center justify-center mb-4" style="background: rgba(226,74,106,0.1);"><i data-lucide="music" style="width:32px;height:32px;color:#e24a6a;"></i>
+       </div>
+       <p class="font-medium text-lg" style="color: #f0e6f6;">Your playlist is empty</p>
+       <p class="text-sm mt-1" style="color: #6b6580;">Add songs to see the doubly linked list in action</p>
+      </div>
+     </div>
+    </div>
+   </div><!-- Toast -->
+   <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center pointer-events-none"></div><!-- Add Song Modal -->
+   <div id="add-modal" class="fixed inset-0 z-40 hidden items-center justify-center" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);">
+    <div class="rounded-2xl p-6 w-full max-w-sm mx-4 slide-up" style="background: #1a1a2e; border: 1px solid rgba(226,74,106,0.2);">
+     <h3 class="font-bold text-lg mb-4" style="color: #f0e6f6;">Add Song to <span id="modal-position">End</span></h3>
+     <form id="add-form" onsubmit="handleAddSong(event)">
+      <div class="mb-3"><label for="song-title" class="block text-sm mb-1" style="color: #6b6580;">Song Title</label> <input id="song-title" type="text" required class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #f0e6f6;" placeholder="Enter song title">
+      </div>
+      <div class="mb-4"><label for="song-artist" class="block text-sm mb-1" style="color: #6b6580;">Artist</label> <input id="song-artist" type="text" required class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #f0e6f6;" placeholder="Enter artist name">
+      </div>
+      <div class="flex gap-2"><button type="button" onclick="hideAddModal()" class="flex-1 px-4 py-2 rounded-lg text-sm font-medium" style="background: rgba(255,255,255,0.05); color: #6b6580;">Cancel</button> <button type="submit" class="flex-1 px-4 py-2 rounded-lg text-sm font-medium" style="background: #e24a6a; color: #fff;">Add Song</button>
+      </div>
+     </form>
+    </div>
+   </div><!-- Delete Confirm -->
+   <div id="delete-modal" class="fixed inset-0 z-40 hidden items-center justify-center" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);">
+    <div class="rounded-2xl p-6 w-full max-w-sm mx-4 slide-up" style="background: #1a1a2e; border: 1px solid rgba(239,68,68,0.2);">
+     <h3 class="font-bold text-lg mb-2" style="color: #f0e6f6;">Remove Song?</h3>
+     <p id="delete-song-name" class="text-sm mb-4" style="color: #6b6580;"></p>
+     <div class="flex gap-2"><button onclick="hideDeleteModal()" class="flex-1 px-4 py-2 rounded-lg text-sm font-medium" style="background: rgba(255,255,255,0.05); color: #6b6580;">Cancel</button> <button onclick="confirmDelete()" class="flex-1 px-4 py-2 rounded-lg text-sm font-medium" style="background: #ef4444; color: #fff;">Remove</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+// Doubly Linked List
+class Node {
+  constructor(data) {
+    this.data = data;
+    this.prev = null;
+    this.next = null;
+    this.id = 'n' + Date.now() + Math.random().toString(36).slice(2,6);
+  }
+}
+
+class DoublyLinkedList {
+  constructor() { this.head = null; this.tail = null; this.size = 0; this.current = null; }
+
+  addToStart(data) {
+    const node = new Node(data);
+    if (!this.head) { this.head = this.tail = node; this.current = node; }
+    else { node.next = this.head; this.head.prev = node; this.head = node; }
+    this.size++;
+    return node;
+  }
+
+  addToEnd(data) {
+    const node = new Node(data);
+    if (!this.tail) { this.head = this.tail = node; this.current = node; }
+    else { node.prev = this.tail; this.tail.next = node; this.tail = node; }
+    this.size++;
+    return node;
+  }
+
+  remove(node) {
+    if (!node) return;
+    if (node.prev) node.prev.next = node.next; else this.head = node.next;
+    if (node.next) node.next.prev = node.prev; else this.tail = node.prev;
+    if (this.current === node) this.current = node.next || node.prev;
+    this.size--;
+  }
+
+  toArray() {
+    const arr = []; let n = this.head;
+    while (n) { arr.push(n); n = n.next; }
+    return arr;
+  }
+
+  shuffle() {
+    const arr = this.toArray();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i].data, arr[j].data] = [arr[j].data, arr[i].data];
+    }
+  }
+}
+
+const playlist = new DoublyLinkedList();
+let addPosition = 'end';
+let deleteTarget = null;
+let isPlaying = false;
+
+// Emoji covers based on hash
+const coverEmojis = ['🎸','🎹','🎷','🎺','🥁','🎻','🎤','🎧','🎵','🎶','💿','📀','🌙','⚡','🔥','💜','🌊','🎪','🦋','✨'];
+const coverGradients = [
+  ['#e24a6a','#a855f7'],['#3b82f6','#06b6d4'],['#f59e0b','#ef4444'],['#10b981','#3b82f6'],
+  ['#8b5cf6','#ec4899'],['#f97316','#eab308'],['#14b8a6','#a855f7'],['#ef4444','#f59e0b'],
+];
+
+function getCover(id) {
+  const h = id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const emoji = coverEmojis[h % coverEmojis.length];
+  const [c1,c2] = coverGradients[h % coverGradients.length];
+  return { emoji, gradient: `linear-gradient(135deg, ${c1}, ${c2})` };
+}
+
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast-msg px-4 py-2 rounded-lg text-sm font-medium';
+  el.style.cssText = 'background: #1a1a2e; color: #f0e6f6; border: 1px solid rgba(226,74,106,0.2);';
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+function showAddModal(pos) {
+  addPosition = pos;
+  document.getElementById('modal-position').textContent = pos === 'start' ? 'Beginning' : 'End';
+  document.getElementById('add-modal').style.display = 'flex';
+  document.getElementById('song-title').focus();
+}
+
+function hideAddModal() {
+  document.getElementById('add-modal').style.display = 'none';
+  document.getElementById('add-form').reset();
+}
+
+function showDeleteModal(node) {
+  deleteTarget = node;
+  document.getElementById('delete-song-name').textContent = `"${node.data.title}" by ${node.data.artist}`;
+  document.getElementById('delete-modal').style.display = 'flex';
+}
+
+function hideDeleteModal() {
+  document.getElementById('delete-modal').style.display = 'none';
+  deleteTarget = null;
+}
+
+function confirmDelete() {
+  if (!deleteTarget) return;
+  const card = document.querySelector(`[data-node-id="${deleteTarget.id}"]`);
+  if (card) { card.classList.add('removing'); }
+  setTimeout(() => {
+    playlist.remove(deleteTarget);
+    hideDeleteModal();
+    renderList();
+    showToast('Song removed');
+  }, 300);
+}
+
+function handleAddSong(e) {
+  e.preventDefault();
+  const title = document.getElementById('song-title').value.trim();
+  const artist = document.getElementById('song-artist').value.trim();
+  if (!title || !artist) return;
+  const node = addPosition === 'start'
+    ? playlist.addToStart({ title, artist })
+    : playlist.addToEnd({ title, artist });
+  hideAddModal();
+  renderList();
+  // Animate new node
+  requestAnimationFrame(() => {
+    const card = document.querySelector(`[data-node-id="${node.id}"]`);
+    if (card) card.classList.add('adding');
+  });
+  showToast(`Added to ${addPosition}`);
+}
+
+function navigateNext() {
+  if (playlist.current && playlist.current.next) {
+    playlist.current = playlist.current.next;
+    renderList();
+  }
+}
+
+function navigatePrev() {
+  if (playlist.current && playlist.current.prev) {
+    playlist.current = playlist.current.prev;
+    renderList();
+  }
+}
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+  renderList();
+}
+
+function shufflePlaylist() {
+  if (playlist.size < 2) return;
+  playlist.shuffle();
+  renderList();
+  showToast('Playlist shuffled!');
+}
+
+function selectNode(node) {
+  playlist.current = node;
+  isPlaying = true;
+  renderList();
+}
+
+function renderList() {
+  const container = document.getElementById('list-container');
+  const empty = document.getElementById('empty-state');
+  const np = document.getElementById('now-playing');
+  const nodes = playlist.toArray();
+
+  document.getElementById('song-count').textContent = `${playlist.size} node${playlist.size !== 1 ? 's' : ''}`;
+
+  // Play icon
+  const playBtn = document.getElementById('btn-play');
+  playBtn.innerHTML = isPlaying ? '<i data-lucide="pause" style="width:20px;height:20px;"></i>' : '<i data-lucide="play" style="width:20px;height:20px;"></i>';
+
+  if (nodes.length === 0) {
+    empty.style.display = 'flex';
+    np.classList.add('hidden');
+    // Clear old cards
+    container.querySelectorAll('.node-card, .pointer-arrow').forEach(e => e.remove());
+    lucide.createIcons();
+    return;
+  }
+
+  empty.style.display = 'none';
+
+  // Now playing
+  if (playlist.current) {
+    np.classList.remove('hidden');
+    const c = getCover(playlist.current.id);
+    const npCover = document.getElementById('np-cover');
+    npCover.style.background = c.gradient;
+    npCover.textContent = c.emoji;
+    document.getElementById('np-title').textContent = playlist.current.data.title;
+    document.getElementById('np-artist').textContent = playlist.current.data.artist;
+    const prevName = playlist.current.prev ? playlist.current.prev.data.title.slice(0,10) : 'null';
+    const nextName = playlist.current.next ? playlist.current.next.data.title.slice(0,10) : 'null';
+    document.getElementById('np-prev-ptr').textContent = `← prev: ${prevName}`;
+    document.getElementById('np-next-ptr').textContent = `next: ${nextName} →`;
+  }
+
+  // Build node cards
+  const existingIds = new Set();
+  nodes.forEach(n => existingIds.add(n.id));
+
+  // Remove old
+  container.querySelectorAll('.node-card, .pointer-arrow').forEach(e => {
+    if (e.classList.contains('pointer-arrow') || !existingIds.has(e.dataset.nodeId)) e.remove();
+  });
+
+  // Create/update
+  nodes.forEach((node, i) => {
+    let card = container.querySelector(`[data-node-id="${node.id}"]`);
+    const cover = getCover(node.id);
+    const isCurrent = node === playlist.current;
+    const prevLabel = node.prev ? node.prev.data.title.slice(0,8) : 'null';
+    const nextLabel = node.next ? node.next.data.title.slice(0,8) : 'null';
+
+    if (!card) {
+      card = document.createElement('div');
+      card.dataset.nodeId = node.id;
+      card.className = 'node-card';
+      container.appendChild(card);
+    }
+
+    card.className = `node-card relative rounded-xl p-3 cursor-pointer transition-all ${isCurrent ? 'active' : ''}`;
+    card.style.cssText = `background: ${isCurrent ? 'rgba(226,74,106,0.12)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isCurrent ? 'rgba(226,74,106,0.4)' : 'rgba(255,255,255,0.06)'}; width: 170px; flex-shrink: 0;`;
+    card.onclick = () => selectNode(node);
+
+    card.innerHTML = `
+      <div class="cover-art w-full aspect-square mb-2 flex items-center justify-center text-4xl" style="background: ${cover.gradient};">
+        ${cover.emoji}
+        ${isCurrent && isPlaying ? '<div class="absolute inset-0 flex items-center justify-center" style="background:rgba(0,0,0,0.3);border-radius:12px;"><i data-lucide="volume-2" style="width:24px;height:24px;color:#fff;"></i></div>' : ''}
+      </div>
+      <p class="font-semibold text-sm truncate" style="color: #f0e6f6;">${node.data.title}</p>
+      <p class="text-xs truncate mb-2" style="color: #6b6580;">${node.data.artist}</p>
+      <div class="flex gap-1 text-xs font-mono mb-2">
+        <span class="px-1.5 py-0.5 rounded" style="background: rgba(168,85,247,0.15); color: #a855f7;">←${prevLabel}</span>
+        <span class="px-1.5 py-0.5 rounded" style="background: rgba(226,74,106,0.15); color: #e24a6a;">${nextLabel}→</span>
+      </div>
+      <button onclick="event.stopPropagation(); showDeleteModal(playlist.toArray()[${i}])" class="w-full py-1 rounded-md text-xs flex items-center justify-center gap-1 transition-all" style="background: rgba(239,68,68,0.1); color: #ef4444;">
+        <i data-lucide="trash-2" style="width:12px;height:12px;"></i> Remove
+      </button>
+      ${node.next ? '<div class="absolute -right-3 top-1/2 -translate-y-1/2 pointer-pulse" style="color: #e24a6a; font-size: 16px; z-index: 2;">⇄</div>' : ''}
+    `;
+  });
+
+  // Reorder DOM to match list order
+  nodes.forEach(node => {
+    const card = container.querySelector(`[data-node-id="${node.id}"]`);
+    if (card) container.appendChild(card);
+  });
+
+  lucide.createIcons();
+}
+
+// Seed some sample songs
+const samples = [
+  { title: 'Midnight Drive', artist: 'Neon Waves' },
+  { title: 'Starfall', artist: 'Luna Echo' },
+  { title: 'Electric Bloom', artist: 'Glass Animals' },
+  { title: 'Retrograde', artist: 'James Blake' },
+];
+samples.forEach(s => playlist.addToEnd(s));
+
+// Element SDK
+const defaultConfig = {
+  playlist_title: 'My Playlist',
+  background_color: '#0a0a0f',
+  accent_color: '#e24a6a',
+  text_color: '#f0e6f6',
+  surface_color: '#1a1a2e',
+  muted_color: '#6b6580',
+  font_family: 'Outfit',
+  font_size: 14
+};
+
+function applyConfig(config) {
+  const title = config.playlist_title || defaultConfig.playlist_title;
+  document.getElementById('playlist-title').textContent = title;
+
+  const bg = config.background_color || defaultConfig.background_color;
+  const accent = config.accent_color || defaultConfig.accent_color;
+  const text = config.text_color || defaultConfig.text_color;
+  const font = config.font_family || defaultConfig.font_family;
+  const size = config.font_size || defaultConfig.font_size;
+
+  document.body.style.fontFamily = `${font}, Outfit, sans-serif`;
+  document.body.style.fontSize = `${size}px`;
+  document.getElementById('playlist-title').style.color = text;
+  document.getElementById('logo-box').style.background = accent;
+  document.getElementById('btn-play').style.background = accent;
+
+  renderList();
+}
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => applyConfig(config),
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: v => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.accent_color || defaultConfig.accent_color, set: v => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+      { get: () => config.muted_color || defaultConfig.muted_color, set: v => { config.muted_color = v; window.elementSdk.setConfig({ muted_color: v }); } },
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: v => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } },
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['playlist_title', config.playlist_title || defaultConfig.playlist_title],
+  ])
+});
+
+renderList();
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea8ff99f4951c71',t:'MTc3NTkwMDA5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
